@@ -1,0 +1,13 @@
+nav{
+    display: flex;
+    justify-content: space-between;
+}
+nav a{
+    text-decoration: none;
+    color: lightseagreen;
+}
+header{
+    padding: 10px;
+    margin: 0 auto;
+    width: 1344px;
+}
