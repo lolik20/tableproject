@@ -8,6 +8,7 @@ import Add from "./Add";
 import AddExcel from "./AddExcel";
 import { DealTableData } from "./DealTableData";
 import "./Header.css";
+import { Invoices } from "./Invoices";
 import Partner from "./Partner";
 import Replace from "./Replace";
 import { TableData } from "./TableData";
@@ -19,10 +20,9 @@ function App() {
         <nav>
           <Link to="/">Сделки</Link>
           <Link to="/excel">Заказ</Link>
-          <Link to="/add">Добавить товар</Link>
           <Link to="/replace">Замена товара</Link>
           <Link to="/partner">Поставщики</Link>
-
+          <Link to="/invoices">Счета</Link>
           </nav>      
 
           <Routes>
@@ -34,6 +34,7 @@ function App() {
             <Route path="/partner" element={<Partner/>}></Route>
 
             <Route path="/deals/:id" element={<DealTableData/>}></Route>
+            <Route path="/invoices" element={<Invoices></Invoices>}></Route>
 
           </Routes>
           </Router>

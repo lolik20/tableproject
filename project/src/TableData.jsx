@@ -43,12 +43,15 @@ export function TableData() {
       }
     ]
   })
+  const options={
+    headers:{
+      "Authorization":"Basic "+ btoa("admin:sQwYySD1B8vVsqGcndiXtrumfQ")
+    }
+  }
 useEffect(() => {
   
     axios.post('https://promspetsservice.f-app.ru/deal/get__all',{
-
-
-}).then(
+},options).then(
   function(response){
 setDeals(response.data)
 console.log(response.data[0])
