@@ -10,7 +10,6 @@ import { DealTableData } from "./DealTableData";
 import "./Header.css";
 import { Invoices } from "./Invoices";
 import Partner from "./Partner";
-import Replace from "./Replace";
 import { TableData } from "./TableData";
 
 
@@ -20,13 +19,11 @@ function App() {
         <nav>
           <Link to="/">Сделки</Link>
           <Link to="/excel">Заказ</Link>
-          <Link to="/replace">Замена товара</Link>
           <Link to="/partner">Поставщики</Link>
           <Link to="/invoices">Счета</Link>
           </nav>      
 
           <Routes>
-            <Route path="/replace" element={<Replace></Replace>}></Route>
           <Route path="/excel" element={<AddExcel/>}></Route>
             <Route path="/add" element={<Add/>}></Route>
 

@@ -1,7 +1,6 @@
 import { useState,useEffect } from 'react';
 import { useParams } from "react-router-dom";
 import * as XLSX from 'xlsx';
-
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -15,6 +14,9 @@ import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import CircularProgress from '@mui/material/CircularProgress';
+import Backdrop from '@mui/material/Backdrop';
+
 const axios = require('axios').default;
 
 export function DealTableData() {
@@ -22,12 +24,24 @@ export function DealTableData() {
     const { id } = useParams()
     const [deal,setDeal]=useState([])
     const [isOpen, setOpen] = useState(false);
+    const [isReplaceOpen,setReplaceOpen]=useState(false);
+    const handleReplaceOpen = () => setReplaceOpen(true);
+    const handleReplaceClose = () => setReplaceOpen(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
     const [name,setName] = useState("")
     const [article,setArticle]= useState("")
     const [brand,setBrand]=useState("");
     const [isChecked,setChecked]=useState(true)
+    const[articler,setArticler]= useState("")
+    const[comment,setComment]=useState("");
+    const [isLoading, setLoading] =useState(true);
+    const articlerChange = (event) => {
+      setArticler(event.target.value);
+    };
+    const commentChange = (event) => {
+      setComment(event.target.value);
+    };
     const handleChange = (event) => {
 
       setChecked(event.target.checked);
@@ -45,6 +59,7 @@ const inputStyle={
     margin:15,
     width:'100%'
 }
+
     const style = {
       borderRadius:5,
       position: 'absolute',
@@ -85,12 +100,18 @@ async  function AddProduct(){
       window.location.reload()
     })
   }
-useEffect(() => {
-    axios.get(`https://promspetsservice.f-app.ru/deal/table_selection/?dealId=${id}&skip=0&limit=50`,options).then(
+  async function Fetch(){
+    await  axios.get(`https://promspetsservice.f-app.ru/deal/table_selection/?dealId=${id}&skip=0&limit=50`,options).then(
   function(response){
+    console.log(isLoading)
 setDeal(response.data)
   }
 );
+setLoading(false)
+  }
+useEffect(() => {
+  localStorage.setItem("dealId",id)
+   Fetch()
 
 }, []);
 const data = [
@@ -110,6 +131,35 @@ XLSX.utils.book_append_sheet(newWorkBook,worksheet,'Test')
 }
   return (
 <>
+<Backdrop
+  sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+  open={isLoading}
+>
+  <CircularProgress color="inherit" />
+</Backdrop>
+<Modal
+        open={isReplaceOpen}
+        onClose={handleReplaceClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+ <Box sx={style}>
+        
+ <TextField id="outlined-basic" onChange={articlerChange} value={articler} label="Старый артикул" style={inputStyle} variant="outlined" />
+            <TextField id="outlined-basic" onChange={brandChange} value={brand} label="Новый артикул" style={inputStyle} variant="outlined" />
+            <TextField id="outlined-basic" onChange={articleChange} value={article} label="Бренд товара" style={inputStyle} variant="outlined" />
+
+            <TextField id="outlined-basic" onChange={commentChange} value={comment} label="Комментарий специалиста" style={inputStyle} variant="outlined" />
+            
+            <div style={{display:'flex',justifyContent:'center'}}>
+          <Button variant="contained" onClick={()=> AddProduct()}>Заменить</Button></div>
+
+       
+        
+        </Box>
+
+      </Modal>
+
 <Modal
         open={isOpen}
         onClose={handleClose}
@@ -155,7 +205,7 @@ XLSX.utils.book_append_sheet(newWorkBook,worksheet,'Test')
            <TableCell>Бренд клиента</TableCell>
            <TableCell>Имя клиента</TableCell>
            <TableCell>Код клиента</TableCell>
-
+          <TableCell></TableCell>
 
           </TableRow>
         </TableHead>
@@ -174,7 +224,14 @@ XLSX.utils.book_append_sheet(newWorkBook,worksheet,'Test')
               <TableCell>{row.name_client}</TableCell>
 
               <TableCell>{row.code_client}</TableCell>
-
+              <TableCell>
+                {row.replacements.length >0 &&
+                  <Button variant="outlined" size="small">
+                  <a onClick={handleReplaceOpen} style={{textDecoration:'none'}}>заменить</a>
+                </Button>
+                }
+            
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

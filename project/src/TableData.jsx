@@ -7,7 +7,8 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
-
+import CircularProgress from '@mui/material/CircularProgress';
+import Backdrop from '@mui/material/Backdrop';
 const axios = require('axios').default;
 
 
@@ -16,6 +17,7 @@ const axios = require('axios').default;
 
 export function TableData() {
   const [deals,setDeals]=useState([{id:1}])
+  const [isLoading, setLoading] =useState(true);
 
   const [deal,setDeal]=useState({
     id:1,
@@ -48,21 +50,31 @@ export function TableData() {
       "Authorization":"Basic "+ btoa("admin:sQwYySD1B8vVsqGcndiXtrumfQ")
     }
   }
+  async function Fetch(){
+  await  axios.post('https://promspetsservice.f-app.ru/deal/get__all',{
+    },options).then(
+      function(response){
+    setDeals(response.data)
+    console.log(response.data[0])
+      }
+      
+    );
+    setLoading(false)
+  }
 useEffect(() => {
   
-    axios.post('https://promspetsservice.f-app.ru/deal/get__all',{
-},options).then(
-  function(response){
-setDeals(response.data)
-console.log(response.data[0])
-  }
-  
-);
+ Fetch()
 
 }, []);
 
 
   return (
+    <><Backdrop
+    sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+    open={isLoading}
+  >
+    <CircularProgress color="inherit" />
+  </Backdrop>
     <TableContainer component={Paper}>
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
         <TableHead>
@@ -94,5 +106,6 @@ console.log(response.data[0])
         </TableBody>
       </Table>
     </TableContainer>
+    </>
   );
 }

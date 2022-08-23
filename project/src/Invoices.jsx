@@ -15,6 +15,8 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import Box from '@mui/material/Box';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import CircularProgress from '@mui/material/CircularProgress';
+import Backdrop from '@mui/material/Backdrop';
 
 const axios = require('axios').default;
 
@@ -31,7 +33,8 @@ export  function Invoices() {
   const [number,setNumber]= useState()
   const [date,setDate]=useState(new Date(Date.now()));
   const [tracker_previous,setTracker]=useState("")
- 
+  const [isLoading, setLoading] =useState(true);
+
   const nameChange = (event) => {
       setName(event.target.value);
     };
@@ -42,9 +45,11 @@ export  function Invoices() {
       setTracker(event.target.value);
     };
 const inputStyle={
-  margin:15,
+  marginTop:15,
+  marginBottom:15,
   width:'100%'
 }
+
   const style = {
     borderRadius:5,
     position: 'absolute',
@@ -79,22 +84,33 @@ const inputStyle={
      ).catch(function(error){
        alert(error)
      })
+     window.location.href="./invoices"
    }
-useEffect(() => {
-  
-    axios.post('https://promspetsservice.f-app.ru/invoice/get_all',{
+   async function Fetch(){
+
+  await  axios.post('https://promspetsservice.f-app.ru/invoice/get_all',{
 },options).then(
   function(response){
 setInvoices(response.data)
   }
   
 );
+setLoading(false)
+   }
+useEffect(() => {
+  Fetch()
 
 }, []);
 
 
   return (
-    <>
+    <><Backdrop
+    sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+    open={isLoading}
+  >
+    <CircularProgress color="inherit" />
+  </Backdrop>
+    
     <Modal
         open={isOpen}
         onClose={handleClose}
@@ -109,7 +125,7 @@ setInvoices(response.data)
         <LocalizationProvider dateAdapter={AdapterDateFns}>
 
         <DatePicker
-        style={{marginLeft:30}}
+        
         label="Дата"
         value={date}
         onChange={(newValue) => {
