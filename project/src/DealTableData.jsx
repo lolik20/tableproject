@@ -16,6 +16,7 @@ import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
+import { borderLeftColor } from '@mui/system';
 
 
 const axios = require('axios').default;
@@ -39,8 +40,27 @@ export function DealTableData() {
     const[articler,setArticler]= useState("")
     const[comment,setComment]=useState("");
     const [isLoading, setLoading] =useState(true);
-
-
+    const [pdfCheck,setPdfCheck]=useState(false);
+    const [xlsxCheck,setXlsx] = useState(false);
+    const [dollarCheck,setDollar] = useState(false)
+    const [euroCheck, setEuroCheck ] =useState(false)
+    const [rubleCheck, setRubleCheck ] =useState(false)
+    const [downloadLink,setDownloadLink]= useState("")
+    const rubleChange=(event)=>{
+      setRubleCheck(event.target.checked);
+    }
+    const euroChange=(event)=>{
+      setEuroCheck(event.target.checked);
+    }
+    const dollarChange=(event)=>{
+      setDollar(event.target.checked)
+    }
+    const xlsxChange=(event)=>{
+        setXlsx(event.target.checked)
+    };
+    const pdfChange=(event)=>{
+      setPdfCheck(event.target.checked)
+  };
     const brandReplaceChange =(event)=>{
       setBrandReplace(event.target.value);
     }
@@ -159,6 +179,7 @@ const excelOptions = {
   }
 }
 
+
 const importExcel = async (e) => {
   const [file] = e.target.files;
   var data = new FormData();
@@ -167,16 +188,33 @@ const importExcel = async (e) => {
   .then(function(response){
   })
 };
- function exportData(){
-  deal.forEach(x=> {
-    let array = new Array();
-    array= Object.values(x);
-    data.push(array);
+const exportOptions ={
+  headers:{
+    "Authorization":"Basic "+ btoa("admin:sQwYySD1B8vVsqGcndiXtrumfQ"),
+    },
+    responseType: "blob" 
+}
+async function exportData(){
+  const course = "RUB"
+  if(dollarCheck){
+    course = "USD"
+  }
+  if(euroCheck){
+    course = "EUR"
+  }
+  const type ="xlsx"
+  if(pdfCheck){
+    type = "pdf"
+  }
+  await axios.get(`https://promspetsservice.f-app.ru/client_rows/offer?course=${course}&type=${type}&dealId=${id}`,exportOptions)
+  .then(function(response){
+    if(response.status==200){
+      let url = window.URL.createObjectURL( new Blob([response.data]))
+      url = url.replace("http://localhost:3000/","https://promspetsservice.f-app.ru/");
+      setDownloadLink(url)
+      }
   })
-let worksheet = XLSX.utils.aoa_to_sheet(data);
-let newWorkBook = XLSX.utils.book_new();
-XLSX.utils.book_append_sheet(newWorkBook,worksheet,'Test')
- XLSX.writeFile(newWorkBook,`${id}.xlsx`)
+
 }
   return (
 <>
@@ -248,12 +286,29 @@ XLSX.utils.book_append_sheet(newWorkBook,worksheet,'Test')
 </Button>
     
             </div>
+            <h4 style={{margin:15}}>Тип файла</h4>
             <div style={{display:'flex',flexDirection:"row",justifyContent:"start",alignContent:"start",gap:10,margin:15}}>
-            <h4>Тип файла</h4>
+            <FormControlLabel checked={xlsxCheck} onChange={xlsxChange} control={<Checkbox defaultChecked />} label="XLSX" />
+            <FormControlLabel checked={pdfCheck} onChange={pdfChange} control={<Checkbox defaultChecked />} label="PDF" />
 
             </div>
+            <h4 style={{margin:15}}>Валюта</h4>
+
             <div style={{display:'flex',flexDirection:"row",justifyContent:"start",alignContent:"start",gap:10,margin:15}}>
-            <h4>Валюта</h4>
+            <FormControlLabel control={<Checkbox defaultChecked />} checked={dollarCheck} onChange={dollarChange} label="$" />
+            <FormControlLabel control={<Checkbox defaultChecked />} checked={euroCheck} onChange={euroChange} label="€" />
+
+            <FormControlLabel control={<Checkbox defaultChecked />} checked={rubleCheck} onChange={rubleChange} label="₽" />
+
+     
+            </div>
+            <div style={{display:'flex',flexDirection:"row",justifyContent:"start",alignContent:"start",gap:10,margin:15}}>
+            <Button style={{height:30}}  variant="outlined" size="small">
+          <a style={{textDecoration:'none'}} onClick={()=>exportData()}>Оффер</a> 
+        </Button>
+        {downloadLink!=""&&
+                <a target="_blank" href={downloadLink}>Скачать</a>
+        }
 
             </div>
 
@@ -322,9 +377,7 @@ XLSX.utils.book_append_sheet(newWorkBook,worksheet,'Test')
         </TableBody>
       </Table>
     </TableContainer>
-    <div style={{width:"100%",margin:10,justifyContent:'end',display:'flex'}}>  <Button  variant="outlined" onClick={()=>exportData()} size="small">
-        Выгрузить таблицу в Excel
-        </Button></div>
+   
   
    </>
   );
