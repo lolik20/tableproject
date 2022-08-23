@@ -17,6 +17,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
 
+
 const axios = require('axios').default;
 
 export function DealTableData() {
@@ -32,10 +33,17 @@ export function DealTableData() {
     const [name,setName] = useState("")
     const [article,setArticle]= useState("")
     const [brand,setBrand]=useState("");
+    const [brandReplace,setBrandReplace]=useState("");
+
     const [isChecked,setChecked]=useState(true)
     const[articler,setArticler]= useState("")
     const[comment,setComment]=useState("");
     const [isLoading, setLoading] =useState(true);
+
+
+    const brandReplaceChange =(event)=>{
+      setBrandReplace(event.target.value);
+    }
     const articlerChange = (event) => {
       setArticler(event.target.value);
     };
@@ -77,6 +85,33 @@ const inputStyle={
         "Authorization":"Basic "+ btoa("admin:sQwYySD1B8vVsqGcndiXtrumfQ")
       }
     }
+    async function AddReplacement(){
+      await axios.post(`https://promspetsservice.f-app.ru/replacement/create`,{
+      "article": article,
+      "brand": brand,
+      "article_replacement": articler,
+      "brand_replacement": brandReplace,
+      "comment":comment
+    },options).then(
+      function(response){
+        console.log(response)
+        if(response.status==200){
+          setOpen(false)
+          Update()
+        }
+      }
+    ).catch(function(error){
+      alert(error)
+    })
+    }
+    
+    async function Update(){
+     await axios.get(`https://promspetsservice.f-app.ru/deal/pick_up/?dealId=${id}`)
+     .then(function(response){
+      window.reload();
+     })
+    }
+
 async  function AddProduct(){
    await axios.post(`https://promspetsservice.f-app.ru/product/product_create`,{
       "name": name,
@@ -110,7 +145,6 @@ setDeal(response.data)
 setLoading(false)
   }
 useEffect(() => {
-  localStorage.setItem("dealId",id)
    Fetch()
 
 }, []);
@@ -118,6 +152,21 @@ const data = [
   ["ID сделки",id],
   ["Название","Бренд клиента","Имя клиента", "Код клиента"]
 ]
+const excelOptions = {
+  headers:{
+    "Authorization":"Basic "+ btoa("admin:sQwYySD1B8vVsqGcndiXtrumfQ"),
+    "Content-Type":"multipart/form-data" 
+  }
+}
+
+const importExcel = async (e) => {
+  const [file] = e.target.files;
+  var data = new FormData();
+  data.append("file",file)
+ await axios.post(`https://promspetsservice.f-app.ru/front/create_table_selection/?dealId=${id}`,data,excelOptions)
+  .then(function(response){
+  })
+};
  function exportData(){
   deal.forEach(x=> {
     let array = new Array();
@@ -146,13 +195,15 @@ XLSX.utils.book_append_sheet(newWorkBook,worksheet,'Test')
  <Box sx={style}>
         
  <TextField id="outlined-basic" onChange={articlerChange} value={articler} label="Старый артикул" style={inputStyle} variant="outlined" />
-            <TextField id="outlined-basic" onChange={brandChange} value={brand} label="Новый артикул" style={inputStyle} variant="outlined" />
-            <TextField id="outlined-basic" onChange={articleChange} value={article} label="Бренд товара" style={inputStyle} variant="outlined" />
+            <TextField id="outlined-basic" onChange={articleChange} value={article} label="Новый артикул" style={inputStyle} variant="outlined" />
+            <TextField id="outlined-basic" onChange={brandReplaceChange} value={brandReplace} label="Старый бренд" style={inputStyle} variant="outlined" />
+
+            <TextField id="outlined-basic" onChange={brandChange} value={brand} label="Новый бренд" style={inputStyle} variant="outlined" />
 
             <TextField id="outlined-basic" onChange={commentChange} value={comment} label="Комментарий специалиста" style={inputStyle} variant="outlined" />
             
             <div style={{display:'flex',justifyContent:'center'}}>
-          <Button variant="contained" onClick={()=> AddProduct()}>Заменить</Button></div>
+          <Button variant="contained" onClick={()=> AddReplacement()}>Заменить</Button></div>
 
        
         
@@ -184,11 +235,26 @@ XLSX.utils.book_append_sheet(newWorkBook,worksheet,'Test')
       
             <h2 style={{marginLeft:10}}>Номер сделки в битрикс: {id}</h2>
             <h2 style={{marginLeft:10}}>Кол-во позиций: {deal.length}</h2>
-            <div style={{display:'flex',justifyContent:'end'}}>
-            <Button variant="outlined" size="small">
+            <div style={{display:'flex',flexDirection:"row",justifyContent:"start",alignContent:"start",gap:10,margin:15}}>
+          <Button style={{height:30}}  variant="outlined" size="small">
           <a style={{textDecoration:'none'}} onClick={handleOpen}>Добавить товар</a>
         </Button>
-        
+        <Button style={{height:30}}  variant="outlined" size="small">
+          <a style={{textDecoration:'none'}} onClick={()=>Update()}>Обновить</a>
+        </Button>
+        <Button variant="contained" style={{fontSize:10}} component="label">
+  Создать
+  <input hidden type="file" onChange={importExcel}/>
+</Button>
+    
+            </div>
+            <div style={{display:'flex',flexDirection:"row",justifyContent:"start",alignContent:"start",gap:10,margin:15}}>
+            <h4>Тип файла</h4>
+
+            </div>
+            <div style={{display:'flex',flexDirection:"row",justifyContent:"start",alignContent:"start",gap:10,margin:15}}>
+            <h4>Валюта</h4>
+
             </div>
 
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -205,6 +271,15 @@ XLSX.utils.book_append_sheet(newWorkBook,worksheet,'Test')
            <TableCell>Бренд клиента</TableCell>
            <TableCell>Имя клиента</TableCell>
            <TableCell>Код клиента</TableCell>
+           <TableCell>Название продукта</TableCell>
+           <TableCell>Артикул продукта</TableCell>
+           <TableCell></TableCell>
+           <TableCell>Колличество</TableCell>
+           <TableCell>Цена</TableCell>
+           <TableCell>Сумма</TableCell>
+           <TableCell>Срок поставки</TableCell>
+
+          <TableCell></TableCell>
           <TableCell></TableCell>
 
           </TableRow>
@@ -224,8 +299,18 @@ XLSX.utils.book_append_sheet(newWorkBook,worksheet,'Test')
               <TableCell>{row.name_client}</TableCell>
 
               <TableCell>{row.code_client}</TableCell>
+              <TableCell>{row.products.length>0? row.products[0].name:""}</TableCell>
+              <TableCell>{row.products.length>0?row.products[0].article:""}</TableCell>
+              <TableCell>{row.products.length>0?(row.products[0].supply?"Поставляем":""):""}</TableCell>
+              <TableCell>{row.quantity} шт.</TableCell>
+              <TableCell>{row.price}$</TableCell>
+              <TableCell>{row.quantity*row.price}$</TableCell>
+              <TableCell>{row.delivery_date} дней</TableCell>
+
+              <TableCell>{row.replacements.length>0?("Замена: "+row.replacements[0].article+" Comment: "+row.replacements[0].comment ):""}</TableCell>
+
               <TableCell>
-                {row.replacements.length >0 &&
+                {row.products.length ==0  &&
                   <Button variant="outlined" size="small">
                   <a onClick={handleReplaceOpen} style={{textDecoration:'none'}}>заменить</a>
                 </Button>

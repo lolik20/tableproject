@@ -13,8 +13,6 @@ const axios = require('axios').default;
 
 
 
-
-
 export function TableData() {
   const [deals,setDeals]=useState([{id:1}])
   const [isLoading, setLoading] =useState(true);
