@@ -17,7 +17,12 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
 import { borderLeftColor } from '@mui/system';
-
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Link
+} from "react-router-dom";
 
 const axios = require('axios').default;
 
@@ -195,14 +200,14 @@ const exportOptions ={
     responseType: "blob" 
 }
 async function exportData(){
-  const course = "RUB"
+  let course = "RUB"
   if(dollarCheck){
     course = "USD"
   }
   if(euroCheck){
     course = "EUR"
   }
-  const type ="xlsx"
+  let type ="xlsx"
   if(pdfCheck){
     type = "pdf"
   }
@@ -211,7 +216,7 @@ async function exportData(){
     if(response.status==200){
       let url = window.URL.createObjectURL( new Blob([response.data]))
       url = url.replace("http://localhost:3000/","https://promspetsservice.f-app.ru/");
-      setDownloadLink(url)
+      setDownloadLink(url+".xlsx")
       }
   })
 
@@ -269,9 +274,7 @@ async function exportData(){
         </Box>
 
       </Modal>
-    <TableContainer component={Paper}>
-      
-            <h2 style={{marginLeft:10}}>Номер сделки в битрикс: {id}</h2>
+      <h2 style={{marginLeft:10}}>Номер сделки в битрикс: {id}    <Link to={`/brands/${id}`} style={{color:'blue'}}>Бренды</Link></h2>
             <h2 style={{marginLeft:10}}>Кол-во позиций: {deal.length}</h2>
             <div style={{display:'flex',flexDirection:"row",justifyContent:"start",alignContent:"start",gap:10,margin:15}}>
           <Button style={{height:30}}  variant="outlined" size="small">
@@ -311,6 +314,9 @@ async function exportData(){
         }
 
             </div>
+    <TableContainer component={Paper}>
+      
+       
 
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
         <TableHead>
@@ -356,11 +362,11 @@ async function exportData(){
               <TableCell>{row.code_client}</TableCell>
               <TableCell>{row.products.length>0? row.products[0].name:""}</TableCell>
               <TableCell>{row.products.length>0?row.products[0].article:""}</TableCell>
-              <TableCell>{row.products.length>0?(row.products[0].supply?"Поставляем":""):""}</TableCell>
-              <TableCell>{row.quantity} шт.</TableCell>
-              <TableCell>{row.price}$</TableCell>
-              <TableCell>{row.quantity*row.price}$</TableCell>
-              <TableCell>{row.delivery_date} дней</TableCell>
+              <TableCell>{row.products.length>0?(row.products[0].supply?"":"Не поставляем"):""}</TableCell>
+              <TableCell>{row.quantity==null||row.quantity==""?"":row.quantity} шт.</TableCell>
+              <TableCell>{row.price==null||row.price==""?"":row.price+'$'}</TableCell>
+              <TableCell>{row.quantity==null||row.price==null?"": row.quantity*row.price +"$"}</TableCell>
+              <TableCell>{row.delivery_date==null||row.delivery_date==""?"":row.delivery_date + " дней"}</TableCell>
 
               <TableCell>{row.replacements.length>0?("Замена: "+row.replacements[0].article+" Comment: "+row.replacements[0].comment ):""}</TableCell>
 
