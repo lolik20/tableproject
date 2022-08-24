@@ -9,8 +9,9 @@ import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
-const axios = require('axios').default;
+import BX24 from 'bx24-api'
 
+const axios = require('axios').default;
 
 
 export function TableData() {
@@ -60,7 +61,14 @@ export function TableData() {
     setLoading(false)
   }
 useEffect(() => {
-  
+  try{
+  let b24dealId=  window.BX24.placement.info().options.ID;
+  if(b24dealId!=null){
+    window.location.href="./deals"+b24dealId;
+  }
+}catch{
+
+}
  Fetch()
 
 }, []);
