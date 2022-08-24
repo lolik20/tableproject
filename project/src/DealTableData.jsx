@@ -171,7 +171,7 @@ setLoading(false)
   }
 useEffect(() => {
    Fetch()
-
+  localStorage.setItem("id",id)
 }, []);
 const data = [
   ["ID сделки",id],
