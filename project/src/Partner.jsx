@@ -14,7 +14,7 @@ import TextField from '@mui/material/TextField';
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
 import axios from "axios";
-import _ from 'underscore'
+import _, { min, some } from 'underscore'
 import FormControlLabel from '@mui/material/FormControlLabel';
 
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
@@ -74,19 +74,39 @@ export default function Partner(){
     }
     function minimalPrice(){
       let some_array = [...deals];
-        
-      let minimalPrices =[
-      
+      let filtered = []
+      let checks = [
+
       ]
-        for(let i =0;i<some_array.length;i++){
-          let rows = some_array[i].supplier_rows;
-          minimalPrices.push({
-            id:i,
-            price:Math.min(...rows.map(x=>x.total_price.toFixed(2)))
+        some_array.filter(x=>x.products.length>0).forEach((x,dealIndex)=>{
+          const supplies =[]
+          blocks.filter(bl=>bl.isBlock==false).forEach((blockObj)=>{
+            
+           supplies.push(x.supplier_rows[blockObj.id])
           })
-        }
-     
-    }
+          const minPrice= Math.min(...supplies.map(f=>f.total_price))
+            filtered.push(supplies.find(p=>p.total_price==minPrice) )
+          let supplyIndex = x.supplier_rows.findIndex(obj=>obj.total_price==minPrice)
+          checks.push({
+            dealIndex:dealIndex,
+            supplyIndex:supplyIndex
+          })
+        })
+      setChecks(some_array,checks)
+      }
+      function setChecks(arr,indexArray){
+        arr.forEach((x)=>{
+          x.supplier_rows.forEach((t)=>{
+            t.calculation=false;
+          })
+        })
+        indexArray.forEach((x)=>
+        {
+          arr[x.dealIndex].supplier_rows[x.supplyIndex].calculation=true
+        })
+       
+        setDeals(arr)
+      }
    async function dealRequest(){
     await axios.get("https://promspetsservice.f-app.ru/selectProvider",options)
       .then(function(response){
@@ -165,8 +185,8 @@ getCourse()
 </Button>
         </div>
   <div style={{display:"flex",flexDirection:"column",alignContent:'end',justifyContent:'end',height:'100%',padding:0,gap:10}}>
-   <span>$ {course.USD.toFixed(2)}₽</span>
-        <span>€ {course.EUR.toFixed(2)}₽</span>
+   <span>$ {course?.USD? course.USD.toFixed(2):""}₽</span>
+        <span>€ {course?.EUR? course.EUR.toFixed(2):""}₽</span>
         <Button variant="contained" onClick={()=>dealRequest()} style={{fontSize:10}} component="label">
   Запросить
 </Button>

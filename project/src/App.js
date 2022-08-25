@@ -25,7 +25,6 @@ function App() {
           <Routes>
           <Route path="/brands/:id" element={<Brands/>}></Route>
             <Route path="/add" element={<Add/>}></Route>
-            <Route path="(/:DOMAIN)(/:PROTOCOL)(:/LANG)(:/APP_SID)"></Route>
             <Route path="/" element={<TableData/>}></Route>
             <Route path="/partner" element={<Partner/>}></Route>
 
