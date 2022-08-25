@@ -72,7 +72,7 @@ const inputStyle={
     await axios.post(`https://promspetsservice.f-app.ru/invoice/create_oun`,{
        name: name,
        number: number,
-       date: date,
+       date: `${date.getUTCMonth()}-${date.get()}-${date.getFullYear()}`,
        tracker_previous: tracker_previous
      },options).then(
        function(response){

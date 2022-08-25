@@ -9,7 +9,7 @@ import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
-import BX24 from 'bx24-api'
+import TextField from '@mui/material/TextField';
 
 const axios = require('axios').default;
 
@@ -17,7 +17,7 @@ const axios = require('axios').default;
 export function TableData() {
   const [deals,setDeals]=useState([{id:1}])
   const [isLoading, setLoading] =useState(true);
-
+  const [number,setNumber]=useState(0)
   const [deal,setDeal]=useState({
     id:1,
     b24_deal_id:122,
@@ -60,6 +60,11 @@ export function TableData() {
     );
     setLoading(false)
   }
+  const inputStyle={
+    marginTop:15,
+    marginBottom:15,
+    width:'100%'
+  }
 useEffect(() => {
   try{
   let b24dealId=  window.BX24.placement.info().options.ID;
@@ -81,6 +86,12 @@ useEffect(() => {
   >
     <CircularProgress color="inherit" />
   </Backdrop>
+  <div style={{display:"flex",flexDirection:"row",gap:20,width:200}}>
+  <TextField id="outlined-basic" value={number} onChange={(e)=>setNumber(e.target.value)} label="Битрикс ID" style={inputStyle} variant="outlined" />
+
+  <Button variant="text" href={`/deals/${number}`}>Перейти</Button>
+  </div>
+
     <TableContainer component={Paper}>
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
         <TableHead>

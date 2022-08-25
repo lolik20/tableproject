@@ -11,7 +11,7 @@ import "./Header.css";
 import { Invoices } from "./Invoices";
 import Partner from "./Partner";
 import { TableData } from "./TableData";
-
+import Trackers from "./Trackers";
 
 function App() {
   return (
@@ -20,6 +20,8 @@ function App() {
           <Link to="/">Сделки</Link>
           <Link to="/partner">Поставщики</Link>
           <Link to="/invoices">Счета</Link>
+          <Link to="/trackers">Трекеры</Link>
+
           </nav>      
 
           <Routes>
@@ -30,6 +32,7 @@ function App() {
 
             <Route path="/deals/:id" element={<DealTableData/>}></Route>
             <Route path="/invoices" element={<Invoices></Invoices>}></Route>
+            <Route path="/trackers" element={<Trackers></Trackers>}></Route>
 
           </Routes>
           </Router>
