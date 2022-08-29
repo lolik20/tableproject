@@ -16,6 +16,7 @@ import Backdrop from '@mui/material/Backdrop';
 import axios from "axios";
 import _, { min, some } from 'underscore'
 import FormControlLabel from '@mui/material/FormControlLabel';
+import url from './url.json'
 
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
 
@@ -49,7 +50,7 @@ export default function Partner(){
       const id  = localStorage.getItem("id")
       setId(id)
       await axios.get(
-        `https://promspetsservice.f-app.ru/supplier_rows/get/?dealId=${id}`,
+        `${url.base}/supplier_rows/get/?dealId=${id}`,
         options
       ).then(function(response){
         
@@ -108,19 +109,19 @@ export default function Partner(){
         setDeals(arr)
       }
    async function dealRequest(){
-    await axios.get("https://promspetsservice.f-app.ru/selectProvider",options)
+    await axios.get(`${url.base}/selectProvider`,options)
       .then(function(response){
         alert(response)
       })
    }
    async function proccessing(){
-    await axios.get("https://promspetsservice.f-app.ru/processingCustomerAnswer",options)
+    await axios.get(`${url.base}/processingCustomerAnswer`,options)
       .then(function(response){
         alert(response)
       })
    }
    async function getCourse(){
-      await axios.get("https://promspetsservice.f-app.ru/front/get_course/",options)
+      await axios.get(`${url.base}/front/get_course/`,options)
       .then(function(response){
         setCourse(response.data)
       })

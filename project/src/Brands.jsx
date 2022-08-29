@@ -16,6 +16,7 @@ import InputLabel from '@mui/material/InputLabel';
 import InputAdornment from '@mui/material/InputAdornment';
 import FormHelperText from '@mui/material/FormHelperText';
 import FormControl from '@mui/material/FormControl';
+import url from './url.json'
 
 const axios = require('axios').default;
 
@@ -38,7 +39,7 @@ export default function Brands(){
     }
   }
    function getMargin(obj){
-      axios.get(`https://promspetsservice.f-app.ru/front/get_markup_brand/?dealId=${id}&brand=${obj}`,options).then(
+      axios.get(`${url.base}/front/get_markup_brand/?dealId=${id}&brand=${obj}`,options).then(
       function(response){
         return  response.data
       }
@@ -52,7 +53,7 @@ const updateOptions={
   headers:{
     "Authorization":"Basic "+ btoa("admin:sQwYySD1B8vVsqGcndiXtrumfQ")
   },
-  url:"https://promspetsservice.f-app.ru/brand/update_markup/",
+  url:`${url.base}/brand/update_markup/`,
   body:{
 dealId:parseFloat( id),
 brand:brand,
@@ -70,7 +71,7 @@ markup:parseFloat(margin)
     Fetch();
    }, []);
    async function Fetch(){
-    await  axios.get(`https://promspetsservice.f-app.ru/brand/get_table/?dealId=${id}`,options).then(
+    await  axios.get(`${url.base}/brand/get_table/?dealId=${id}`,options).then(
   function(response){
 setBrands(response.data)
   }

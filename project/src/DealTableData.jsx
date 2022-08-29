@@ -23,6 +23,7 @@ import {
   Route,
   Link
 } from "react-router-dom";
+import url from './url.json'
 
 const axios = require('axios').default;
 
@@ -111,7 +112,7 @@ const inputStyle={
       }
     }
     async function AddReplacement(){
-      await axios.post(`https://promspetsservice.f-app.ru/replacement/create`,{
+      await axios.post(`${url.base}/replacement/create`,{
       "article": article,
       "brand": brand,
       "article_replacement": articler,
@@ -131,14 +132,14 @@ const inputStyle={
     }
     
     async function Update(){
-     await axios.get(`https://promspetsservice.f-app.ru/deal/pick_up/?dealId=${id}`)
+     await axios.get(`${url.base}/deal/pick_up/?dealId=${id}`)
      .then(function(response){
       window.reload();
      })
     }
 
 async  function AddProduct(){
-   await axios.post(`https://promspetsservice.f-app.ru/product/product_create`,{
+   await axios.post(`${url.base}/product/product_create`,{
       "name": name,
       "article": article,
       "brand": brand,
@@ -156,12 +157,12 @@ async  function AddProduct(){
     })
   }
   async function Update(){
-    await axios.get(`https://promspetsservice.f-app.ru/deal/pick_up/?dealId=${id}`,options).then(function(response){
+    await axios.get(`${url.base}/deal/pick_up/?dealId=${id}`,options).then(function(response){
       window.location.reload()
     })
   }
   async function Fetch(){
-    await  axios.get(`https://promspetsservice.f-app.ru/deal/table_selection/?dealId=${id}&skip=0&limit=50`,options).then(
+    await  axios.get(`${url.base}/deal/table_selection/?dealId=${id}&skip=0&limit=50`,options).then(
   function(response){
     console.log(isLoading)
 setDeal(response.data)
@@ -189,7 +190,7 @@ const importExcel = async (e) => {
   const [file] = e.target.files;
   var data = new FormData();
   data.append("file",file)
- await axios.post(`https://promspetsservice.f-app.ru/front/create_table_selection/?dealId=${id}`,data,excelOptions)
+ await axios.post(`${url.base}/front/create_table_selection/?dealId=${id}`,data,excelOptions)
   .then(function(response){
   })
 };
@@ -211,11 +212,11 @@ async function exportData(){
   if(pdfCheck){
     type = "pdf"
   }
-  await axios.get(`https://promspetsservice.f-app.ru/client_rows/offer?course=${course}&type=${type}&dealId=${id}`,exportOptions)
+  await axios.get(`${url.base}/client_rows/offer?course=${course}&type=${type}&dealId=${id}`,exportOptions)
   .then(function(response){
     if(response.status==200){
       let url = window.URL.createObjectURL( new Blob([response.data]))
-      url = url.replace("http://localhost:3000/","https://promspetsservice.f-app.ru/");
+      url = url.replace("http://localhost:3000/",`${url.base}/`);
       setDownloadLink(url+".xlsx")
       }
   })

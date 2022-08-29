@@ -10,6 +10,7 @@ import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
 import TextField from '@mui/material/TextField';
+import url from './url.json'
 
 const axios = require('axios').default;
 
@@ -50,7 +51,7 @@ export function TableData() {
     }
   }
   async function Fetch(){
-  await  axios.post('https://promspetsservice.f-app.ru/deal/get__all',{
+  await  axios.post(`${url.base}/deal/get__all`,{
     },options).then(
       function(response){
     setDeals(response.data)

@@ -17,6 +17,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
+import url from './url.json'
 
 const axios = require('axios').default;
 
@@ -69,7 +70,7 @@ const inputStyle={
   }
  
   async  function AddInvoice(){
-    await axios.post(`https://promspetsservice.f-app.ru/invoice/create_oun`,{
+    await axios.post(`${url.base}/invoice/create_oun`,{
        name: name,
        number: number,
        date: `${date.getUTCMonth()}-${date.get()}-${date.getFullYear()}`,
@@ -88,7 +89,7 @@ const inputStyle={
    }
    async function Fetch(){
 
-  await  axios.post('https://promspetsservice.f-app.ru/invoice/get_all',{
+  await  axios.post(`${url.base}/invoice/get_all`,{
 },options).then(
   function(response){
 setInvoices(response.data)
