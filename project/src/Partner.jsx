@@ -16,6 +16,8 @@ import Backdrop from '@mui/material/Backdrop';
 import axios from "axios";
 import _, { min, some } from 'underscore'
 import FormControlLabel from '@mui/material/FormControlLabel';
+import Modal from '@mui/material/Modal';
+import Box from '@mui/material/Box';
 import url from './url.json'
 
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
@@ -25,6 +27,17 @@ export default function Partner(){
     const colors = ["#9D8DF1","#95F2D9","#6383ea","#3c979e"]
   const [isLoading,setLoading]= useState(true)
     const [id,setId] = useState(0)
+    const [name,setName] = useState("")
+    const[articler,setArticler]= useState("")
+    const[comment,setComment]=useState("");
+    const [article,setArticle]= useState("")
+    const [brand,setBrand]=useState("");
+    const [isOpen, setOpen] = useState(false);
+
+    const [brandReplace,setBrandReplace]=useState("");
+    const [isReplaceOpen,setReplaceOpen]=useState(false);
+    const handleReplaceOpen = () => setReplaceOpen(true);
+    const handleReplaceClose = () => setReplaceOpen(false);
     const [course,setCourse]=useState({})
     const [blocks,setBlocks]=useState([
       {isBlock:false},
@@ -41,11 +54,62 @@ export default function Partner(){
       {isBlock:false},
       {isBlock:false}])
     const [supplyCount, setCount] =useState(0);
+    const brandReplaceChange =(event)=>{
+      setBrandReplace(event.target.value);
+    }
+    const articlerChange = (event) => {
+      setArticler(event.target.value);
+    };
+    const commentChange = (event) => {
+      setComment(event.target.value);
+    };
+  
+      const articleChange = (event) => {
+        setArticle(event.target.value);
+      };
+      const brandChange = (event) => {
+        setBrand(event.target.value);
+      };
     const options = {
       headers:{
         "Authorization":"Basic "+ btoa("admin:sQwYySD1B8vVsqGcndiXtrumfQ")
       }
     }
+    const inputStyle={
+      margin:15,
+      width:'100%'
+  }
+  
+      const style = {
+        borderRadius:5,
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: 400,
+        bgcolor: 'background.paper',
+        border: '1px solid #000',
+        boxShadow: 24,
+        p: 4,
+      };
+      async function AddReplacement(){
+        await axios.post(`${url.base}/replacement/create`,{
+        "article": article,
+        "brand": brand,
+        "article_replacement": articler,
+        "brand_replacement": brandReplace,
+        "comment":comment
+      },options).then(
+        function(response){
+          console.log(response)
+          if(response.status==200){
+            setOpen(false)
+          }
+        }
+      ).catch(function(error){
+        alert(error)
+      })
+      }
     async function Fetch(){
       const id  = localStorage.getItem("id")
       setId(id)
@@ -54,8 +118,8 @@ export default function Partner(){
         options
       ).then(function(response){
         
-      
-        let count = Math.max(...response.data.map(x=>x.supplier_rows.length))
+      console.log(response.data)
+        let count = Math.max(...response.data.results.map(x=>x.supplier_rows.length))
         console.log(count)
         setCount(count)
         let arr =[];
@@ -67,7 +131,7 @@ export default function Partner(){
           })
         }
         setBlocks(arr)
-        setDeals(response.data)
+        setDeals(response.data.results)
 
       })
      
@@ -107,6 +171,19 @@ export default function Partner(){
         })
        
         setDeals(arr)
+      }
+      async function Send(){
+        let requestIds = []
+       deals.forEach(x=>{
+        x.supplier_rows.forEach(supply => {
+          if(supply.calculation){
+            requestIds.push(supply.id)
+          }
+        });
+       })
+       await axios.post(`${url.base}/update_calculation/?dealId=${id}`,requestIds,options).then(function(response){
+       alert(response.status)
+       })
       }
    async function dealRequest(){
     await axios.get(`${url.base}/selectProvider`,options)
@@ -164,8 +241,33 @@ getCourse()
     console.log(event.target.checked)
 
     }
+    
     return(
         <>
+        <Modal
+        open={isReplaceOpen}
+        onClose={handleReplaceClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+ <Box sx={style}>
+        
+ <TextField id="outlined-basic" onChange={articlerChange} value={articler} label="Старый артикул" style={inputStyle} variant="outlined" />
+            <TextField id="outlined-basic" onChange={articleChange} value={article} label="Новый артикул" style={inputStyle} variant="outlined" />
+            <TextField id="outlined-basic" onChange={brandReplaceChange} value={brandReplace} label="Старый бренд" style={inputStyle} variant="outlined" />
+
+            <TextField id="outlined-basic" onChange={brandChange} value={brand} label="Новый бренд" style={inputStyle} variant="outlined" />
+
+            <TextField id="outlined-basic" onChange={commentChange} value={comment} label="Комментарий специалиста" style={inputStyle} variant="outlined" />
+            
+            <div style={{display:'flex',justifyContent:'center'}}>
+          <Button variant="contained" onClick={()=> AddReplacement()}>Заменить</Button></div>
+
+       
+        
+        </Box>
+
+      </Modal>
         <Backdrop
     sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
     open={isLoading}
@@ -183,6 +285,9 @@ getCourse()
 <Button variant="contained" style={{fontSize:10}} onClick={()=>minimalPrice()} component="label">
   Подобрать минимальную стоимость
 
+</Button>
+<Button variant="contained" style={{fontSize:10}} onClick={()=>Send()} component="label">
+Отправить в расчёт
 </Button>
         </div>
   <div style={{display:"flex",flexDirection:"column",alignContent:'end',justifyContent:'end',height:'100%',padding:0,gap:10}}>
@@ -225,6 +330,9 @@ getCourse()
                     <TableCell style={{padding:5}}></TableCell>
 
                     <TableCell style={{padding:5}}></TableCell>
+                    <TableCell style={{padding:5}}></TableCell>
+                    <TableCell style={{padding:5}}></TableCell>
+                    <TableCell style={{padding:5}}></TableCell>
 
                     <TableCell style={{padding:5}} >
                 <FormControlLabel label="Блокировать" onChange={(event)=>block(e,event)} checked={blocks[e].isBlock} control={<Checkbox  color="default" />}style={{margin:10,fontSize:10}} />
@@ -255,9 +363,13 @@ getCourse()
                 <TableCell  style={{padding:5}}>
                 <FormControlLabel onChange={(event)=>checkAll(e,event)} control={<Checkbox   color="default" />}style={{margin:10}} />
                 </TableCell >
-                <TableCell style={{padding:5}} >Колво</TableCell>
-                <TableCell  style={{padding:5}}>Срок</TableCell>
-                  
+                <TableCell style={{padding:5}} >Кол-во1</TableCell>
+                <TableCell style={{padding:5}} >Кол-во2</TableCell>
+
+                <TableCell  style={{padding:5}}>Срок1</TableCell>
+                <TableCell  style={{padding:5}}>Срок2</TableCell>
+                <TableCell  style={{padding:5}}>Замена</TableCell>
+
                 </React.Fragment>
                 );
               })
@@ -299,9 +411,26 @@ getCourse()
   
                       </TableCell>
                       <TableCell style={{padding:5}}>
+                      {supply.quantitysd}
+  
+                      </TableCell>
+                      <TableCell style={{padding:5}}>
                         {supply.delivery_date} дней
                       </TableCell>
-                     
+                      <TableCell style={{padding:5}}>
+                        {supply.delivery_date_sd==null?"":supply.delivery_date_sd+ " дней"} 
+                      </TableCell>
+                      <TableCell style={{padding:5}}>
+                        {supply.replacement!=null&&
+                        <React.Fragment>
+                                <Button>Заменить</Button>
+                                <span>{supply.replacement}</span>
+                        </React.Fragment>
+                        
+
+                        }
+                        
+                      </TableCell>
                     </React.Fragment>
   
                   ))

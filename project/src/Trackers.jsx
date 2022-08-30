@@ -12,6 +12,8 @@ import Backdrop from '@mui/material/Backdrop';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import url from './url.json'
+import Pagination from '@mui/material/Pagination';
+import Stack from '@mui/material/Stack';
 
 
 
@@ -41,11 +43,9 @@ export default function Trackers(){
       }
       const [trackers,setTrackers]= useState([])
     async function Fetch(){
-        await  axios.post(`${url.base}/deal/get__all`,{
-          },options).then(
+        await  axios.get(`${url.base}/delivery/?skip=0&limit=100`,options).then(
             function(response){
-          setTrackers(response.data)
-          console.log(response.data[0])
+          setTrackers(response.data.results)
             }
             
           );
@@ -68,6 +68,7 @@ export default function Trackers(){
         
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
+        
       >
  <Box sx={style}>
         
@@ -85,29 +86,41 @@ export default function Trackers(){
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
             <TableHead>
               <TableRow>
-                <TableCell>ID</TableCell>
-                <TableCell>B24 ID</TableCell>
-                <TableCell>Название</TableCell>
-    
+                <TableCell>Номер</TableCell>
+                <TableCell>Откуда</TableCell>
+                <TableCell>Куда</TableCell>
+                <TableCell>Предыдущий трекер</TableCell>
+                <TableCell>Дата отгрузки</TableCell>
+                <TableCell>Планируемая дата доставки</TableCell>
+
     
               </TableRow>
             </TableHead>
             <TableBody>
               {trackers.map((row) => (
                 <TableRow
-                  key={row.id}
+                  
                   sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                 >
-                  <TableCell component="th" scope="row">
-                    {row.id}
-                  </TableCell>
-                  <TableCell>{row.b24_deal_id}</TableCell>
-                  <TableCell>{row.title}</TableCell>
+                  
+                  <TableCell>{row.tracking_number}</TableCell>
+                  <TableCell>{row.from_where}</TableCell>
+                  <TableCell>{row.to_where}</TableCell>
+
+                  <TableCell>{row.tracker_previous}</TableCell>
+
+                  <TableCell>{row.date_dispatch}</TableCell>
+
+                  <TableCell>{row.date_planned_delivery}</TableCell>
+
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </TableContainer>
+        <Stack spacing={2}>
+      <Pagination count={10} variant="outlined" />
+      </Stack>
         </>
     )
 }

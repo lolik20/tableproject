@@ -16,47 +16,22 @@ import Stack from '@mui/material/Stack';
 const axios = require('axios').default;
 
 
-export function TableData() {
+export function OrderSupplier() {
   const [deals,setDeals]=useState([{id:1}])
   const [isLoading, setLoading] =useState(true);
   const [number,setNumber]=useState(0)
-  const [deal,setDeal]=useState({
-    id:1,
-    b24_deal_id:122,
-    festC_deal_id:1,
-    title:"title",
-    stage_id:1,
-    prrp:"",
-    wamargin:"",
-    client_rows:[
-      {
-        title:"11",
-        brend_client:"",
-        code_client:"",
-        article_client:"",
-        name_client:"",
-        quantity:10,
-        price:1,
-        amount:2,
-        delivery_date:1,
-        id:1,
-        b24_productrows_id:1,
-        festC_productrows_id:1,
-        created_date:"2022-07-28T18:10:29.463080"
-      }
-    ]
-  })
+  const [deal,setDeal]=useState([])
   const options={
     headers:{
       "Authorization":"Basic "+ btoa("admin:sQwYySD1B8vVsqGcndiXtrumfQ")
     }
   }
   async function Fetch(){
-  await  axios.post(`${url.base}/deal/get__all`,{
-    },options).then(
+    const dealId= localStorage.getItem('id')
+  await  axios.get(`${url.base}/order_supplier/?dealId=${dealId}&skip=0&limit=100`,options).then(
       function(response){
-    setDeals(response.data)
-    console.log(response.data[0])
+    setDeals(response.data.results)
+    console.log(response.data)
       }
       
     );
@@ -68,14 +43,7 @@ export function TableData() {
     width:'100%'
   }
 useEffect(() => {
-  try{
-  let b24dealId=  window.BX24.placement.info().options.ID;
-  if(b24dealId!=null){
-    window.location.href="./deals"+b24dealId;
-  }
-}catch{
-
-}
+ 
  Fetch()
 
 }, []);
@@ -99,10 +67,8 @@ useEffect(() => {
         <TableHead>
           <TableRow>
             <TableCell>ID</TableCell>
-            <TableCell>B24 ID</TableCell>
-            <TableCell>Название</TableCell>
-            <TableCell>Клиент</TableCell>
-            <TableCell></TableCell>
+            <TableCell>Номер</TableCell>
+            
 
 
           </TableRow>
@@ -116,10 +82,9 @@ useEffect(() => {
               <TableCell component="th" scope="row">
                 {row.id}
               </TableCell>
-              <TableCell>{row.b24_deal_id}</TableCell>
-              <TableCell>{row.title}</TableCell>
-              <TableCell>{row.client}</TableCell>
-              <TableCell><Button variant="text" href={`/deals/${row.b24_deal_id}`}>Подробнее</Button></TableCell>
+            <TableCell>
+              {row.number}
+            </TableCell>
             </TableRow>
           ))}
         </TableBody>

@@ -13,13 +13,14 @@ import TextField from '@mui/material/TextField';
 import url from './url.json'
 import Pagination from '@mui/material/Pagination';
 import Stack from '@mui/material/Stack';
+import { useParams } from 'react-router-dom';
 const axios = require('axios').default;
 
 
-export function TableData() {
+export function Feedback() {
   const [deals,setDeals]=useState([{id:1}])
   const [isLoading, setLoading] =useState(true);
-  const [number,setNumber]=useState(0)
+  const {id}=useParams()
   const [deal,setDeal]=useState({
     id:1,
     b24_deal_id:122,
@@ -52,8 +53,7 @@ export function TableData() {
     }
   }
   async function Fetch(){
-  await  axios.post(`${url.base}/deal/get__all`,{
-    },options).then(
+  await  axios.get(`${url.base}/supplier_rows/get_all?productID=${id}`,options).then(
       function(response){
     setDeals(response.data)
     console.log(response.data[0])
@@ -68,14 +68,7 @@ export function TableData() {
     width:'100%'
   }
 useEffect(() => {
-  try{
-  let b24dealId=  window.BX24.placement.info().options.ID;
-  if(b24dealId!=null){
-    window.location.href="./deals"+b24dealId;
-  }
-}catch{
 
-}
  Fetch()
 
 }, []);
@@ -89,9 +82,7 @@ useEffect(() => {
     <CircularProgress color="inherit" />
   </Backdrop>
   <div style={{display:"flex",flexDirection:"row",gap:20,width:200}}>
-  <TextField id="outlined-basic" value={number} onChange={(e)=>setNumber(e.target.value)} label="Битрикс ID" style={inputStyle} variant="outlined" />
 
-  <Button variant="text" href={`/deals/${number}`}>Перейти</Button>
   </div>
 
     <TableContainer component={Paper}>
@@ -99,9 +90,9 @@ useEffect(() => {
         <TableHead>
           <TableRow>
             <TableCell>ID</TableCell>
-            <TableCell>B24 ID</TableCell>
-            <TableCell>Название</TableCell>
-            <TableCell>Клиент</TableCell>
+            <TableCell>Стоимость</TableCell>
+            <TableCell>Срок поставки</TableCell>
+            <TableCell>Дата создания</TableCell>
             <TableCell></TableCell>
 
 
@@ -116,10 +107,9 @@ useEffect(() => {
               <TableCell component="th" scope="row">
                 {row.id}
               </TableCell>
-              <TableCell>{row.b24_deal_id}</TableCell>
-              <TableCell>{row.title}</TableCell>
-              <TableCell>{row.client}</TableCell>
-              <TableCell><Button variant="text" href={`/deals/${row.b24_deal_id}`}>Подробнее</Button></TableCell>
+              <TableCell>{row.total_price}</TableCell>
+              <TableCell>{row.delivery_date==null?"":row.delivery_date+" дней"}</TableCell>
+              <TableCell>{row.created_date}</TableCell>
             </TableRow>
           ))}
         </TableBody>

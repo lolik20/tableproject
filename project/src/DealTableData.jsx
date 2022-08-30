@@ -16,6 +16,8 @@ import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import CircularProgress from '@mui/material/CircularProgress';
 import Backdrop from '@mui/material/Backdrop';
+import Pagination from '@mui/material/Pagination';
+import Stack from '@mui/material/Stack';
 import { borderLeftColor } from '@mui/system';
 import {
   BrowserRouter as Router,
@@ -165,7 +167,7 @@ async  function AddProduct(){
     await  axios.get(`${url.base}/deal/table_selection/?dealId=${id}&skip=0&limit=50`,options).then(
   function(response){
     console.log(isLoading)
-setDeal(response.data)
+setDeal(response.data.results)
   }
 );
 setLoading(false)
@@ -343,7 +345,7 @@ async function exportData(){
 
           <TableCell></TableCell>
           <TableCell></TableCell>
-
+<TableCell></TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -379,12 +381,23 @@ async function exportData(){
                 }
             
               </TableCell>
+              <TableCell>
+              {row.products.length>0&&
+                 <Button style={{height:30,textDecoration:"none"}}  variant="outlined" size="small">
+                  
+                 <Link to={`/feedback/${row.products[0].id}`}>Перейти</Link> 
+               </Button>
+                 }
+                </TableCell>
             </TableRow>
           ))}
         </TableBody>
-      </Table>
+      </Table> 
+    
     </TableContainer>
-   
+    <Stack spacing={2}>
+      <Pagination count={10} variant="outlined" />
+      </Stack>
   
    </>
   );

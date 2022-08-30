@@ -20,6 +20,10 @@ import Backdrop from '@mui/material/Backdrop';
 import Pagination from '@mui/material/Pagination';
 import Stack from '@mui/material/Stack';
 import url from './url.json'
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
 
 const axios = require('axios').default;
 
@@ -27,19 +31,25 @@ const axios = require('axios').default;
 
 
 
-export  function Invoices() {
+export  function Bills() {
   const [invoices,setInvoices]=useState([])
   const [isOpen, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
+  const[numbers,setNumbers] = useState([])
   const handleClose = () => setOpen(false);
   const [name,setName] = useState("")
-  const [number,setNumber]= useState()
+  const [isOrder,setOrder]=useState(false)
+  const [number,setNumber]= useState(1)
   const [date,setDate]=useState(new Date(Date.now()));
   const [tracker_previous,setTracker]=useState("")
+  const [excelFile,setExcelFile]= useState("");
   const [isLoading, setLoading] =useState(true);
-
+const token = localStorage.getItem('token')
   const nameChange = (event) => {
       setName(event.target.value);
+    };
+    const handleChange = (event) => {
+      setNumber(event.target.value);
     };
     const numberChange = (event) => {
       setNumber(event.target.value);
@@ -71,13 +81,10 @@ const inputStyle={
     }
   }
  
-  async  function AddInvoice(){
-    await axios.post(`${url.base}/invoice/create_oun`,{
-       name: name,
-       number: number,
-       date: `${date.getUTCMonth()}-${date.get()}-${date.getFullYear()}`,
-       tracker_previous: tracker_previous
-     },options).then(
+
+  async  function AddBill(){
+    const dealId = localStorage.getItem("id")
+    await axios.post(`${url.base}/order_client/?dealId=${dealId}&number=${number}`,excelFile,options).then(
        function(response){
          console.log(response)
          if(response.status==200){
@@ -87,14 +94,21 @@ const inputStyle={
      ).catch(function(error){
        alert(error)
      })
-     window.location.href="./invoices"
    }
-   async function Fetch(){
+   const onChange = (e) => {
+    const [file] = e.target.files;
+  var data = new FormData();
+  data.append("file",file)
+  setExcelFile(data)
+  };
 
-  await  axios.get(`${url.base}/invoice/?skip=0&limit=100`,options).then(
+  
+   async function Fetch(){
+    const id  = localStorage.getItem("id")
+
+  await  axios.get(`${url.base}/order_client/numbers?dealId=${id}`,options).then(
   function(response){
-    console.log(response.data)
-setInvoices(response.data.results)
+setNumbers(response.data)
   }
   
 );
@@ -122,23 +136,14 @@ useEffect(() => {
       >
  <Box sx={style}>
         
-        <TextField id="outlined-basic" onChange={nameChange} value={name} label="Наименование" style={inputStyle} variant="outlined" />
         <TextField id="outlined-basic" value={number} onChange={numberChange} label="Номер" style={inputStyle} variant="outlined" />
-        <TextField id="outlined-basic" value={tracker_previous} onChange={trackerChange} label="Трекер" style={inputStyle} variant="outlined" />
-        <LocalizationProvider dateAdapter={AdapterDateFns}>
 
-        <DatePicker
-        
-        label="Дата"
-        value={date}
-        onChange={(newValue) => {
-          setDate(newValue);
-        }}
-        renderInput={(params) => <TextField {...params} />}
-      />            </LocalizationProvider>
-
+        <Button variant="contained" style={{fontSize:10}} component="label">
+  Загрузить excel
+  <input hidden type="file" onChange={onChange}/>
+</Button>
           <div style={{display:'flex',justifyContent:'center'}}>
-          <Button variant="contained" style={{margin:10}} onClick={()=> AddInvoice()}>Добавить</Button></div>
+          <Button variant="contained" style={{margin:10}} onClick={()=> AddBill()}>Добавить</Button></div>
 
        
         
@@ -146,21 +151,41 @@ useEffect(() => {
 
       </Modal>
   
-        
-        <TableContainer component={Paper}>
+        <div style={{display:'flex',justifyContent:'center',flexDirection:"column",width:300}}>
+        <h2>Номер сделки: {localStorage.getItem("id")}</h2>
         <Button variant="outlined" size="small">
-          <a style={{textDecoration:'none'}} onClick={handleOpen}>Добавить инвойс </a>
+          <a style={{textDecoration:'none'}} onClick={handleOpen}>Добавить</a>
         </Button>
+        <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+        <InputLabel id="demo-simple-select-standard-label">Номер</InputLabel>
+        <Select
+          labelId="demo-simple-select-standard-label"
+          id="demo-simple-select-standard"
+          value={number}
+          onChange={handleChange}
+          label="номер"
+        >
+                                <MenuItem >ddd</MenuItem>
+
+          {numbers.forEach(x=>{
+                      <MenuItem value={x}>{x}</MenuItem>
+
+          })}
+          
+        </Select>
+      </FormControl>
+        </div>
+        <TableContainer component={Paper}>
+         
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
         <TableHead>
           <TableRow>
             <TableCell>ID</TableCell>
-            <TableCell>Номер</TableCell>
-            <TableCell>Откуда</TableCell>
-            <TableCell>Куда</TableCell>
-            <TableCell>Предыдущий трекер</TableCell>
-            <TableCell>Дата отгрузки</TableCell>
-            <TableCell>Планируемая дата доставки</TableCell>
+            <TableCell>Артикул</TableCell>
+            <TableCell>Кол-во</TableCell>
+            <TableCell>Цена</TableCell>
+            <TableCell>Сумма</TableCell>
+
           </TableRow>
         </TableHead>
         <TableBody>
@@ -171,13 +196,12 @@ useEffect(() => {
             >
          
               <TableCell>{row.id}</TableCell>
-              <TableCell>{row.tracking_number}</TableCell>
-              <TableCell>{row.from_where}</TableCell>
-              <TableCell>{row.to_where}</TableCell>
-              <TableCell>{row.tracker_previous}</TableCell>
-              <TableCell>{row.date_dispatch}</TableCell>
-              <TableCell>{row.date_planned_delivery}</TableCell>
+              
+              <TableCell>{row.products.length>0?row.products[0].article:""}</TableCell>
+              <TableCell>{row.quantity}</TableCell>
+              <TableCell>{row.price}</TableCell>
 
+              <TableCell>{row.amount} </TableCell>
             </TableRow>
           ))}
         </TableBody>
