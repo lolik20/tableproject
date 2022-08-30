@@ -13,14 +13,26 @@ import TextField from '@mui/material/TextField';
 import url from './url.json'
 import Pagination from '@mui/material/Pagination';
 import Stack from '@mui/material/Stack';
+import Modal from '@mui/material/Modal';
+import Box from '@mui/material/Box';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
 const axios = require('axios').default;
 
 
 export function OrderSupplier() {
+  const id = localStorage.getItem('id')
+  const [isOpen,setOpen]=useState(false)
   const [deals,setDeals]=useState([{id:1}])
   const [isLoading, setLoading] =useState(true);
   const [number,setNumber]=useState(0)
   const [deal,setDeal]=useState([])
+  const [numbers,setNumbers]=useState([])
+  const handleChange = (event) => {
+    setNumber(event.target.value);
+  };
   const options={
     headers:{
       "Authorization":"Basic "+ btoa("admin:sQwYySD1B8vVsqGcndiXtrumfQ")
@@ -37,6 +49,18 @@ export function OrderSupplier() {
     );
     setLoading(false)
   }
+  const style = {
+    borderRadius:5,
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 400,
+    bgcolor: 'background.paper',
+    border: '1px solid #000',
+    boxShadow: 24,
+    p: 4,
+  };
   const inputStyle={
     marginTop:15,
     marginBottom:15,
@@ -56,12 +80,46 @@ useEffect(() => {
   >
     <CircularProgress color="inherit" />
   </Backdrop>
-  <div style={{display:"flex",flexDirection:"row",gap:20,width:200}}>
-  <TextField id="outlined-basic" value={number} onChange={(e)=>setNumber(e.target.value)} label="Битрикс ID" style={inputStyle} variant="outlined" />
+  <Modal
+    key="dddawdwadwad"
+        open={isOpen}
+        onClose={()=>setOpen(false)}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+ <Box sx={style}>
+        
+       
 
-  <Button variant="text" href={`/deals/${number}`}>Перейти</Button>
-  </div>
+       
+        
+        </Box>
 
+      </Modal>
+<div style={{display:'flex',justifyContent:'center',flexDirection:"column",width:300}}>
+        <h2>Номер сделки: {localStorage.getItem("id")}</h2>
+        <Button variant="outlined" size="small">
+          <a style={{textDecoration:'none'}} onClick={()=>setOpen(true)}>Добавить</a>
+        </Button>
+      
+        <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+        <InputLabel id="demo-simple-select-standard-label">Номер</InputLabel>
+
+        <Select
+          labelId="demo-simple-select-standard-label"
+          id="demo-simple-select-standard"
+          value={number}
+          onChange={handleChange}
+          label="номер"
+        >
+{numbers.map((x,i)=>{
+return(
+  <MenuItem key={i} value={x}>{x}</MenuItem>
+)
+})}      
+        </Select>
+      </FormControl>
+        </div>
     <TableContainer component={Paper}>
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
         <TableHead>

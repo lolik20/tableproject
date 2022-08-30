@@ -145,21 +145,20 @@ useEffect(() => {
   </Backdrop>
     
     <Modal
+    key="dddawdwadwad"
         open={isOpen}
         onClose={handleClose}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
  <Box sx={style}>
-        
         <TextField id="outlined-basic" value={number} onChange={numberChange} label="Номер" style={inputStyle} variant="outlined" />
 
         <Button variant="contained" style={{fontSize:10}} component="label">
   Загрузить excel
   <input hidden type="file" onChange={onChange}/>
 </Button>
-          <div style={{display:'flex',justifyContent:'center'}}>
-          <Button variant="contained" style={{margin:10}} onClick={()=> AddBill()}>Добавить</Button></div>
+          <Button variant="contained" style={{margin:10}} onClick={()=> AddBill()}>Добавить</Button>
 
        
         
@@ -185,7 +184,7 @@ useEffect(() => {
         >
 {numbers.map((x,i)=>{
 return(
-  <MenuItem value={x}>{x}</MenuItem>
+  <MenuItem key={i} value={x}>{x}</MenuItem>
 )
 })}      
         </Select>

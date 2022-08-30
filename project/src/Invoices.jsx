@@ -72,10 +72,10 @@ const inputStyle={
   }
  
   async  function AddInvoice(){
-    await axios.post(`${url.base}/invoice/create_oun`,{
+    await axios.post(`${url.base}/invoice/`,{
        name: name,
        number: number,
-       date: `${date.getUTCMonth()}-${date.get()}-${date.getFullYear()}`,
+       date: date.toISOString().slice(0,10),
        tracker_previous: tracker_previous
      },options).then(
        function(response){
@@ -84,9 +84,7 @@ const inputStyle={
            setOpen(false)
          }
        }
-     ).catch(function(error){
-       alert(error)
-     })
+     )
      window.location.href="./invoices"
    }
    async function Fetch(){

@@ -25,13 +25,18 @@ import {
   Route,
   Link
 } from "react-router-dom";
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
 import url from './url.json'
 
 const axios = require('axios').default;
 
 export function DealTableData() {
-  
     const { id } = useParams()
+    const [limit,setLimit]=useState(50);
+    const [count,setCount]=useState(0)
     const [deal,setDeal]=useState([])
     const [isOpen, setOpen] = useState(false);
     const [isReplaceOpen,setReplaceOpen]=useState(false);
@@ -54,6 +59,7 @@ export function DealTableData() {
     const [euroCheck, setEuroCheck ] =useState(false)
     const [rubleCheck, setRubleCheck ] =useState(false)
     const [downloadLink,setDownloadLink]= useState("")
+    const [totalPrice,setTotalPrice]=useState(0)
     const rubleChange=(event)=>{
       setRubleCheck(event.target.checked);
     }
@@ -68,6 +74,9 @@ export function DealTableData() {
     };
     const pdfChange=(event)=>{
       setPdfCheck(event.target.checked)
+  };  const limitChange = (event) => {
+    setLimit(event.target.value);
+    Fetch()
   };
     const brandReplaceChange =(event)=>{
       setBrandReplace(event.target.value);
@@ -164,9 +173,15 @@ async  function AddProduct(){
     })
   }
   async function Fetch(){
-    await  axios.get(`${url.base}/deal/table_selection/?dealId=${id}&skip=0&limit=50`,options).then(
+    // await axios.get(`${url.base}/client_rows/sum?dealId=${id}`)
+    // .then(function(response){
+    //   setTotalPrice(response.data)
+    // })
+    setLoading(true)
+    await  axios.get(`${url.base}/deal/table_selection/?dealId=${id}&skip=0&limit=${limit}`,options).then(
   function(response){
     console.log(isLoading)
+    setCount(response.data.count)
 setDeal(response.data.results)
   }
 );
@@ -214,6 +229,8 @@ async function exportData(){
   if(pdfCheck){
     type = "pdf"
   }
+ 
+
   await axios.get(`${url.base}/client_rows/offer?course=${course}&type=${type}&dealId=${id}`,exportOptions)
   .then(function(response){
     if(response.status==200){
@@ -292,31 +309,26 @@ async function exportData(){
 </Button>
     
             </div>
-            <h4 style={{margin:15}}>Тип файла</h4>
+            <h4 style={{margin:15}}>Параметры</h4>
             <div style={{display:'flex',flexDirection:"row",justifyContent:"start",alignContent:"start",gap:10,margin:15}}>
             <FormControlLabel checked={xlsxCheck} onChange={xlsxChange} control={<Checkbox defaultChecked />} label="XLSX" />
             <FormControlLabel checked={pdfCheck} onChange={pdfChange} control={<Checkbox defaultChecked />} label="PDF" />
 
-            </div>
-            <h4 style={{margin:15}}>Валюта</h4>
 
-            <div style={{display:'flex',flexDirection:"row",justifyContent:"start",alignContent:"start",gap:10,margin:15}}>
             <FormControlLabel control={<Checkbox defaultChecked />} checked={dollarCheck} onChange={dollarChange} label="$" />
             <FormControlLabel control={<Checkbox defaultChecked />} checked={euroCheck} onChange={euroChange} label="€" />
 
             <FormControlLabel control={<Checkbox defaultChecked />} checked={rubleCheck} onChange={rubleChange} label="₽" />
 
-     
-            </div>
-            <div style={{display:'flex',flexDirection:"row",justifyContent:"start",alignContent:"start",gap:10,margin:15}}>
             <Button style={{height:30}}  variant="outlined" size="small">
           <a style={{textDecoration:'none'}} onClick={()=>exportData()}>Оффер</a> 
         </Button>
         {downloadLink!=""&&
                 <a target="_blank" href={downloadLink}>Скачать</a>
         }
-
             </div>
+            
+
     <TableContainer component={Paper}>
       
        
@@ -340,7 +352,10 @@ async function exportData(){
            <TableCell></TableCell>
            <TableCell>Колличество</TableCell>
            <TableCell>Цена</TableCell>
-           <TableCell>Сумма</TableCell>
+           <TableCell style={{position:'relative'}}><div style={{fontSize:10,whiteSpace:'nowrap',position:'absolute',top:0,left:0}}><span>
+           Общая сумма {totalPrice}$</span>
+       
+            </div>Сумма</TableCell>
            <TableCell>Срок поставки</TableCell>
 
           <TableCell></TableCell>
@@ -398,7 +413,25 @@ async function exportData(){
     <Stack spacing={2}>
       <Pagination count={10} variant="outlined" />
       </Stack>
-  
+      <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+        <InputLabel id="demo-simple-select-standard-label">Кол-во на странице</InputLabel>
+
+        <Select
+        defaultValue={50}
+          labelId="demo-simple-select-standard-label"
+          id="demo-simple-select-standard"
+          value={limit}
+          onChange={limitChange}
+          label="номер"
+        >
+
+                
+          <MenuItem value={50}>50</MenuItem>
+          <MenuItem value={100}>100</MenuItem>
+          <MenuItem value={count}>{count}</MenuItem>
+
+        </Select>
+      </FormControl>
    </>
   );
 }
