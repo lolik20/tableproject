@@ -35,7 +35,7 @@ export  function Bills() {
   const [invoices,setInvoices]=useState([])
   const [isOpen, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
-  const[numbers,setNumbers] = useState([])
+  const [numbers,setNumbers] = useState([])
   const handleClose = () => setOpen(false);
   const [name,setName] = useState("")
   const [isOrder,setOrder]=useState(false)
@@ -102,7 +102,18 @@ const inputStyle={
   setExcelFile(data)
   };
 
-  
+  useEffect(()=>{
+
+    getRows()
+  },[number])
+   async function getRows(){
+    const id  = localStorage.getItem("id")
+
+    await  axios.get(`${url.base}/order_client/?number=${number}&dealId=${id}`,options).then(
+    function(response){
+  setInvoices(response.data.results)
+    })
+   }
    async function Fetch(){
     const id  = localStorage.getItem("id")
 
@@ -110,16 +121,21 @@ const inputStyle={
   function(response){
 setNumbers(response.data)
   }
+
   
 );
+
 setLoading(false)
    }
+
+  useEffect(() => {
+  }, [numbers]);
 useEffect(() => {
   Fetch()
 
 }, []);
 
-
+ 
   return (
     <><Backdrop
     sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
@@ -156,8 +172,10 @@ useEffect(() => {
         <Button variant="outlined" size="small">
           <a style={{textDecoration:'none'}} onClick={handleOpen}>Добавить</a>
         </Button>
+      
         <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
         <InputLabel id="demo-simple-select-standard-label">Номер</InputLabel>
+
         <Select
           labelId="demo-simple-select-standard-label"
           id="demo-simple-select-standard"
@@ -165,13 +183,11 @@ useEffect(() => {
           onChange={handleChange}
           label="номер"
         >
-                                <MenuItem >ddd</MenuItem>
-
-          {numbers.forEach(x=>{
-                      <MenuItem value={x}>{x}</MenuItem>
-
-          })}
-          
+{numbers.map((x,i)=>{
+return(
+  <MenuItem value={x}>{x}</MenuItem>
+)
+})}      
         </Select>
       </FormControl>
         </div>
