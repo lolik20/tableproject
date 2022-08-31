@@ -195,7 +195,7 @@ export default function Partner(){
           }
         });
        })
-       await axios.post(`${url.base}/update_calculation/?dealId=${id}`,requestIds,options).then(function(response){
+       await axios.post(`${url.base}/supplier_rows/update_calculation/?dealId=${id}`,requestIds,options).then(function(response){
        alert(response.status)
        })
       }
