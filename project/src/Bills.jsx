@@ -24,6 +24,7 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
+import { TablePagination } from '@mui/material';
 
 const axios = require('axios').default;
 
@@ -44,7 +45,19 @@ export  function Bills() {
   const [tracker_previous,setTracker]=useState("")
   const [excelFile,setExcelFile]= useState("");
   const [isLoading, setLoading] =useState(true);
+  const [count,setCount] = useState(0)
 const token = localStorage.getItem('token')
+const [page, setPage] = useState(0);
+const [rowsPerPage, setRowsPerPage] = useState(10);
+
+const handleChangePage = (event, newPage) => {
+  setPage(newPage);
+};
+
+const handleChangeRowsPerPage = (event) => {
+  setRowsPerPage(parseInt(event.target.value, 10));
+  setPage(0);
+};
   const nameChange = (event) => {
       setName(event.target.value);
     };
@@ -81,7 +94,9 @@ const inputStyle={
     }
   }
  
-
+useEffect(()=>{
+Fetch()
+},[page,rowsPerPage])
   async  function AddBill(){
     const dealId = localStorage.getItem("id")
     await axios.post(`${url.base}/order_client/?dealId=${dealId}&number=${number}`,excelFile,options).then(
@@ -117,9 +132,10 @@ const inputStyle={
    async function Fetch(){
     const id  = localStorage.getItem("id")
 
-  await  axios.get(`${url.base}/order_client/numbers?dealId=${id}`,options).then(
+  await  axios.get(`${url.base}/order_client/numbers?dealId=${id}&skip=${page*rowsPerPage}&limit=${rowsPerPage}`,options).then(
   function(response){
 setNumbers(response.data)
+setCount(response.data.count)
   }
 
   
@@ -223,9 +239,14 @@ return(
       </Table>
     
     </TableContainer>
-    <Stack spacing={2}>
-      <Pagination count={10} variant="outlined" />
-      </Stack>
+    <TablePagination
+      component="div"
+      count={count}
+      page={page}
+      onPageChange={handleChangePage}
+      rowsPerPage={rowsPerPage}
+      onRowsPerPageChange={handleChangeRowsPerPage}
+    />
     </>
   );
 }

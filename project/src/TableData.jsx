@@ -13,13 +13,26 @@ import TextField from '@mui/material/TextField';
 import url from './url.json'
 import Pagination from '@mui/material/Pagination';
 import Stack from '@mui/material/Stack';
+import { TablePagination } from '@mui/material';
 const axios = require('axios').default;
 
 
 export function TableData() {
   const [deals,setDeals]=useState([{id:1}])
+  const [count,setCount ]=useState(0)
   const [isLoading, setLoading] =useState(true);
   const [number,setNumber]=useState(0)
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
   const [deal,setDeal]=useState({
     id:1,
     b24_deal_id:122,
@@ -52,7 +65,8 @@ export function TableData() {
     }
   }
   async function Fetch(){
-  await  axios.post(`${url.base}/deal/get__all`,{
+    setLoading(true)
+  await  axios.post(`${url.base}/deal/get__all/?skip=${page*rowsPerPage}&limit=${rowsPerPage}`,{
     },options).then(
       function(response){
     setDeals(response.data)
@@ -126,9 +140,14 @@ useEffect(() => {
       </Table>
       
     </TableContainer>
-    <Stack spacing={2}>
-      <Pagination count={10} variant="outlined" />
-      </Stack>
+    <TablePagination
+  component="div"
+  count={count/rowsPerPage}
+  page={page}
+  onPageChange={handleChangePage}
+  rowsPerPage={rowsPerPage}
+  onRowsPerPageChange={handleChangeRowsPerPage}
+/>
     </>
   );
 }

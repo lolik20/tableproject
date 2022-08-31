@@ -20,6 +20,7 @@ import Backdrop from '@mui/material/Backdrop';
 import Pagination from '@mui/material/Pagination';
 import Stack from '@mui/material/Stack';
 import url from './url.json'
+import { TablePagination } from '@mui/material';
 
 const axios = require('axios').default;
 
@@ -37,6 +38,18 @@ export  function Invoices() {
   const [date,setDate]=useState(new Date(Date.now()));
   const [tracker_previous,setTracker]=useState("")
   const [isLoading, setLoading] =useState(true);
+  const[count,setCount] =useState(0)
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   const nameChange = (event) => {
       setName(event.target.value);
@@ -88,8 +101,8 @@ const inputStyle={
      window.location.href="./invoices"
    }
    async function Fetch(){
-
-  await  axios.get(`${url.base}/invoice/?skip=0&limit=100`,options).then(
+    setLoading(true)
+  await  axios.get(`${url.base}/invoice/?skip=${page*rowsPerPage}&limit=${rowsPerPage}`,options).then(
   function(response){
     console.log(response.data)
 setInvoices(response.data.results)
@@ -98,6 +111,9 @@ setInvoices(response.data.results)
 );
 setLoading(false)
    }
+   useEffect(()=>{
+    Fetch()
+   },[rowsPerPage,page])
 useEffect(() => {
   Fetch()
 
@@ -182,9 +198,14 @@ useEffect(() => {
       </Table>
     
     </TableContainer>
-    <Stack spacing={2}>
-      <Pagination count={10} variant="outlined" />
-      </Stack>
+    <TablePagination
+      component="div"
+      count={count}
+      page={page}
+      onPageChange={handleChangePage}
+      rowsPerPage={rowsPerPage}
+      onRowsPerPageChange={handleChangeRowsPerPage}
+    />
     </>
   );
 }

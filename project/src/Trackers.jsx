@@ -18,6 +18,7 @@ import TextField from '@mui/material/TextField';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { TablePagination } from '@mui/material';
 
 const axios = require('axios').default;
 
@@ -50,6 +51,18 @@ export default function Trackers(){
 
   const[date_planned_delivery,setDatePlanned] = useState(new Date())
   const [isLoading,setLoading] =useState(true)
+  const[count,setCount]=useState(0)
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
     const options={
         headers:{
           "Authorization":"Basic "+ btoa("admin:sQwYySD1B8vVsqGcndiXtrumfQ")
@@ -71,19 +84,25 @@ export default function Trackers(){
           
         );
       }
+      
     async function Fetch(){
-        await  axios.get(`${url.base}/delivery/?skip=0&limit=100`,options).then(
+      setLoading(true)
+        await  axios.get(`${url.base}/delivery/?skip=${page*rowsPerPage}&limit=${rowsPerPage}`,options).then(
             function(response){
           setTrackers(response.data.results)
+          setCount(response.data.count)
             }
             
           );
           setLoading(false)
         }
-        useEffect(()=>{
+
+    useEffect(()=>{
         Fetch()
     },[])
-
+    useEffect(()=>{
+        Fetch()
+    },[rowsPerPage,page])
     return(
         <><Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
@@ -174,9 +193,14 @@ renderInput={(params) => <TextField {...params} />}
             </TableBody>
           </Table>
         </TableContainer>
-        <Stack spacing={2}>
-      <Pagination count={10} variant="outlined" />
-      </Stack>
+        <TablePagination
+      component="div"
+      count={count}
+      page={page}
+      onPageChange={handleChangePage}
+      rowsPerPage={rowsPerPage}
+      onRowsPerPageChange={handleChangeRowsPerPage}
+    />
         </>
     )
 }

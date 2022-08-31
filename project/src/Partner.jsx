@@ -19,21 +19,24 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import url from './url.json'
+import { TablePagination } from "@mui/material";
 
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
 
 export default function Partner(){
     const [deals,setDeals]= useState([])
-    const colors = ["#9D8DF1","#95F2D9","#6383ea","#3c979e"]
   const [isLoading,setLoading]= useState(true)
     const [id,setId] = useState(0)
-    const [name,setName] = useState("")
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+  
+   
     const[articler,setArticler]= useState("")
     const[comment,setComment]=useState("");
     const [article,setArticle]= useState("")
     const [brand,setBrand]=useState("");
     const [isOpen, setOpen] = useState(false);
-
+    const [objCount,setObjCount] = useState(0)
     const [brandReplace,setBrandReplace]=useState("");
     const [isReplaceOpen,setReplaceOpen]=useState(false);
     const handleReplaceOpen = () => setReplaceOpen(true);
@@ -63,7 +66,13 @@ export default function Partner(){
     const commentChange = (event) => {
       setComment(event.target.value);
     };
-  
+    const handleChangePage = (event, newPage) => {
+      setPage(newPage);
+    };
+    const handleChangeRowsPerPage = (event) => {
+      setRowsPerPage(parseInt(event.target.value, 10));
+      setPage(0);
+    };
       const articleChange = (event) => {
         setArticle(event.target.value);
       };
@@ -110,14 +119,19 @@ export default function Partner(){
         alert(error)
       })
       }
+      useEffect(()=>{
+        Fetch()
+      },[rowsPerPage,page])
     async function Fetch(){
+      setLoading(true)
+
       const id  = localStorage.getItem("id")
       setId(id)
       await axios.get(
-        `${url.base}/supplier_rows/get/?dealId=${id}`,
+        `${url.base}/supplier_rows/get/?dealId=${id}&skip=${rowsPerPage*page}&limit=${rowsPerPage}`,
         options
       ).then(function(response){
-        
+        setObjCount(response.data.count)
       console.log(response.data)
         let count = Math.max(...response.data.results.map(x=>x.supplier_rows.length))
         console.log(count)
@@ -444,7 +458,14 @@ getCourse()
       </Table>
 
     </TableContainer>
-
+    <TablePagination
+      component="div"
+      count={objCount/rowsPerPage}
+      page={page}
+      onPageChange={handleChangePage}
+      rowsPerPage={rowsPerPage}
+      onRowsPerPageChange={handleChangeRowsPerPage}
+    />
   
     </>
      

@@ -14,6 +14,7 @@ import url from './url.json'
 import Pagination from '@mui/material/Pagination';
 import Stack from '@mui/material/Stack';
 import { useParams } from 'react-router-dom';
+import { TablePagination } from '@mui/material';
 const axios = require('axios').default;
 
 
@@ -21,6 +22,18 @@ export function Feedback() {
   const [deals,setDeals]=useState([{id:1}])
   const [isLoading, setLoading] =useState(true);
   const {id}=useParams()
+  const [count,setCount]=useState(0)
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
   const [deal,setDeal]=useState({
     id:1,
     b24_deal_id:122,
@@ -53,10 +66,12 @@ export function Feedback() {
     }
   }
   async function Fetch(){
-  await  axios.get(`${url.base}/supplier_rows/get_all?productID=${id}`,options).then(
+    setLoading(true)
+  await  axios.get(`${url.base}/supplier_rows/get_all?productID=${id}&skip=${page*rowsPerPage}&limit=${rowsPerPage}`,options).then(
       function(response){
     setDeals(response.data)
     console.log(response.data[0])
+    setCount(response.data.count)
       }
       
     );
@@ -73,7 +88,9 @@ useEffect(() => {
 
 }, []);
 
-
+useEffect(()=>{
+  
+},[page,rowsPerPage])
   return (
     <><Backdrop
     sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
@@ -116,9 +133,14 @@ useEffect(() => {
       </Table>
       
     </TableContainer>
-    <Stack spacing={2}>
-      <Pagination count={10} variant="outlined" />
-      </Stack>
+    <TablePagination
+      component="div"
+      count={count}
+      page={page}
+      onPageChange={handleChangePage}
+      rowsPerPage={rowsPerPage}
+      onRowsPerPageChange={handleChangeRowsPerPage}
+    />
     </>
   );
 }

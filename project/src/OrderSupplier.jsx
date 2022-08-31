@@ -19,6 +19,7 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
+import { TablePagination } from '@mui/material';
 const axios = require('axios').default;
 
 
@@ -30,6 +31,18 @@ export function OrderSupplier() {
   const [number,setNumber]=useState(0)
   const [deal,setDeal]=useState([])
   const [numbers,setNumbers]=useState([])
+  const [count,setCount]=useState(0)
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
   const handleChange = (event) => {
     setNumber(event.target.value);
   };
@@ -38,15 +51,21 @@ export function OrderSupplier() {
       "Authorization":"Basic "+ btoa("admin:sQwYySD1B8vVsqGcndiXtrumfQ")
     }
   }
+  useEffect(()=>{
+    Fetch()
+  },[rowsPerPage,page])
   async function Fetch(){
+    setLoading(true)
     const dealId= localStorage.getItem('id')
-  await  axios.get(`${url.base}/order_supplier/?dealId=${dealId}&skip=0&limit=100`,options).then(
+  await  axios.get(`${url.base}/order_supplier/?dealId=${dealId}&skip=${page*rowsPerPage}&limit=${rowsPerPage}`,options).then(
       function(response){
     setDeals(response.data.results)
     console.log(response.data)
+    setCount(response.data.count)
       }
       
     );
+  
     setLoading(false)
   }
   const style = {
@@ -149,9 +168,14 @@ return(
       </Table>
       
     </TableContainer>
-    <Stack spacing={2}>
-      <Pagination count={10} variant="outlined" />
-      </Stack>
+    <TablePagination
+      component="div"
+      count={count}
+      page={page}
+      onPageChange={handleChangePage}
+      rowsPerPage={rowsPerPage}
+      onRowsPerPageChange={handleChangeRowsPerPage}
+    />
     </>
   );
 }

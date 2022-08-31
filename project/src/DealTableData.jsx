@@ -30,12 +30,12 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import url from './url.json'
+import { TablePagination } from '@mui/material';
 
 const axios = require('axios').default;
 
 export function DealTableData() {
     const { id } = useParams()
-    const [limit,setLimit]=useState(50);
     const [count,setCount]=useState(0)
     const [deal,setDeal]=useState([])
     const [isOpen, setOpen] = useState(false);
@@ -56,6 +56,9 @@ export function DealTableData() {
     const [pdfCheck,setPdfCheck]=useState(false);
     const [xlsxCheck,setXlsx] = useState(false);
     const [dollarCheck,setDollar] = useState(false)
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+
     const [euroCheck, setEuroCheck ] =useState(false)
     const [rubleCheck, setRubleCheck ] =useState(false)
     const [downloadLink,setDownloadLink]= useState("")
@@ -63,6 +66,10 @@ export function DealTableData() {
     const rubleChange=(event)=>{
       setRubleCheck(event.target.checked);
     }
+    const handleChangeRowsPerPage = (event) => {
+      setRowsPerPage(parseInt(event.target.value, 10));
+      setPage(0);
+    };
     const euroChange=(event)=>{
       setEuroCheck(event.target.checked);
     }
@@ -74,9 +81,10 @@ export function DealTableData() {
     };
     const pdfChange=(event)=>{
       setPdfCheck(event.target.checked)
-  };  const limitChange = (event) => {
-    setLimit(event.target.value);
-    Fetch()
+  };  
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
   };
     const brandReplaceChange =(event)=>{
       setBrandReplace(event.target.value);
@@ -100,6 +108,7 @@ export function DealTableData() {
       const brandChange = (event) => {
         setBrand(event.target.value);
       };
+   
 const inputStyle={
     margin:15,
     width:'100%'
@@ -172,13 +181,18 @@ async  function AddProduct(){
       window.location.reload()
     })
   }
+  useEffect(()=>{
+    Fetch()
+  },[page,rowsPerPage])
+ 
   async function Fetch(){
-    // await axios.get(`${url.base}/client_rows/sum?dealId=${id}`)
-    // .then(function(response){
-    //   setTotalPrice(response.data)
-    // })
     setLoading(true)
-    await  axios.get(`${url.base}/deal/table_selection/?dealId=${id}&skip=0&limit=${limit}`,options).then(
+    await axios.get(`${url.base}/client_rows/sum?dealId=${id}`,options)
+    .then(function(response){
+      setTotalPrice(response.data)
+    })
+    setLoading(true)
+    await  axios.get(`${url.base}/deal/table_selection/?dealId=${id}&skip=${page*rowsPerPage}&limit=${rowsPerPage}`,options).then(
   function(response){
     console.log(isLoading)
     setCount(response.data.count)
@@ -382,8 +396,8 @@ async function exportData(){
               <TableCell>{row.products.length>0?row.products[0].article:""}</TableCell>
               <TableCell>{row.products.length>0?(row.products[0].supply?"":"Не поставляем"):""}</TableCell>
               <TableCell>{row.quantity==null||row.quantity==""?"":row.quantity} шт.</TableCell>
-              <TableCell>{row.price==null||row.price==""?"":row.price+'$'}</TableCell>
-              <TableCell>{row.quantity==null||row.price==null?"": row.quantity*row.price +"$"}</TableCell>
+              <TableCell>{row.price==null||row.price==""?"":Math.round(row.price)+'$'}</TableCell>
+              <TableCell>{row.quantity==null||row.price==null?"": Math.round( row.quantity*row.price) +"$"}</TableCell>
               <TableCell>{row.delivery_date==null||row.delivery_date==""?"":row.delivery_date + " дней"}</TableCell>
 
               <TableCell>{row.replacements.length>0?("Замена: "+row.replacements[0].article+" Comment: "+row.replacements[0].comment ):""}</TableCell>
@@ -411,27 +425,9 @@ async function exportData(){
     
     </TableContainer>
     <Stack spacing={2}>
-      <Pagination count={10} variant="outlined" />
+      <TablePagination rowsPerPage={rowsPerPage} onRowsPerPageChange={handleChangeRowsPerPage} component="div" page={page} onPageChange={handleChangePage} count={(parseInt( count/rowsPerPage))} variant="outlined" />
       </Stack>
-      <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
-        <InputLabel id="demo-simple-select-standard-label">Кол-во на странице</InputLabel>
-
-        <Select
-        defaultValue={50}
-          labelId="demo-simple-select-standard-label"
-          id="demo-simple-select-standard"
-          value={limit}
-          onChange={limitChange}
-          label="номер"
-        >
-
-                
-          <MenuItem value={50}>50</MenuItem>
-          <MenuItem value={100}>100</MenuItem>
-          <MenuItem value={count}>{count}</MenuItem>
-
-        </Select>
-      </FormControl>
+      
    </>
   );
 }
