@@ -20,6 +20,7 @@ import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import url from './url.json'
 import { TablePagination } from "@mui/material";
+import './DealTableData.css'
 
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
 
@@ -29,8 +30,9 @@ export default function Partner(){
     const [id,setId] = useState(0)
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
-  
-   
+    const [partnerPage,setPartnerPage]=useState();
+    const [rowsPartner,setRowsPartner]=useState();
+
     const[articler,setArticler]= useState("")
     const[comment,setComment]=useState("");
     const [article,setArticle]= useState("")
@@ -41,6 +43,8 @@ export default function Partner(){
     const [isReplaceOpen,setReplaceOpen]=useState(false);
     const handleReplaceOpen = () => setReplaceOpen(true);
     const handleReplaceClose = () => setReplaceOpen(false);
+    const [ feedback,setFeedback]=useState([])
+    const [isProductsOpen,setProductsOpen]=useState(false);
     const [course,setCourse]=useState({})
     const [blocks,setBlocks]=useState([
       {isBlock:false},
@@ -101,6 +105,18 @@ export default function Partner(){
         boxShadow: 24,
         p: 4,
       };
+      async function fetchFeedback(id){
+        setLoading(true)
+        await  axios.get(`${url.base}/supplier_rows/get_all?productID=${id}&skip=${page*rowsPerPage}&limit=${rowsPerPage}`,options).then(
+            function(response){
+          setFeedback(response.data)
+          console.log(response.data[0])
+          setCount(response.data.count)
+            }
+            
+          );
+          setLoading(false)
+      }
       async function AddReplacement(){
         await axios.post(`${url.base}/replacement/create`,{
         "article": article,
@@ -255,10 +271,66 @@ getCourse()
     console.log(event.target.checked)
 
     }
-    
     return(
         <>
+              {/* МОДАЛКА ДЛЯ ПРОДУКТОВ */}
+
+
         <Modal
+        open={isProductsOpen}
+        onClose={()=>setProductsOpen(false)}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+ <Box sx={style} style={{width:1000}}>
+        
+<>
+    {/* <TableContainer component={Paper}>
+      <Table sx={{ minWidth: 650 }} aria-label="simple table">
+        <TableHead>
+          <TableRow>
+            <TableCell>ID</TableCell>
+            <TableCell>Стоимость</TableCell>
+            <TableCell>Срок поставки</TableCell>
+            <TableCell>Дата создания</TableCell>
+            <TableCell></TableCell>
+
+
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {feedback.map((row) => (
+            <TableRow
+              key={row.id}
+              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+            >
+              <TableCell component="th" scope="row">
+                {row.id}
+              </TableCell>
+              <TableCell>{row.total_price}</TableCell>
+              <TableCell>{row.delivery_date==null?"":row.delivery_date+" дней"}</TableCell>
+              <TableCell>{row.created_date}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      
+    </TableContainer>
+    <TablePagination
+      component="div"
+      count={100}
+      page={partnerPage}
+      onPageChange={handleChangePage}
+      rowsPerPage={rowsPartner}
+      onRowsPerPageChange={handleChangeRowsPerPage}
+    /> */}
+    </>
+        
+        </Box>
+
+      </Modal>
+              {/* МОДАЛКА ДЛЯ СОЗДАНИЯ ПРОДУКТА */}
+              <Modal
         open={isReplaceOpen}
         onClose={handleReplaceClose}
         aria-labelledby="modal-modal-title"
@@ -322,16 +394,16 @@ getCourse()
                 
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
         <TableHead>
-        <TableRow style={{padding:3}}>
-            <TableCell  style={{padding:3}}>
+        <TableRow>
+            <TableCell >
             </TableCell>
-            <TableCell  style={{padding:3}}>
+            <TableCell >
               </TableCell>
-              <TableCell style={{padding:3}}>
+              <TableCell>
               </TableCell>
-              <TableCell style={{padding:3}}>
+              <TableCell>
               </TableCell>
-              <TableCell style={{padding:3}}>
+              <TableCell>
               </TableCell>
      
               {
@@ -340,15 +412,16 @@ getCourse()
                 
                 return( 
                   <React.Fragment key={"head_"+e}>
-                    <TableCell  style={{padding:5,borderLeft:"1px solid #D2CECD"}}>Поставщик №{e+1}</TableCell>
-                    <TableCell style={{padding:5}}></TableCell>
+                    <TableCell></TableCell>
+                    <TableCell  style={{borderLeft:"1px solid #D2CECD"}}>Поставщик №{e+1}</TableCell>
+                    <TableCell ></TableCell>
 
-                    <TableCell style={{padding:5}}></TableCell>
-                    <TableCell style={{padding:5}}></TableCell>
-                    <TableCell style={{padding:5}}></TableCell>
-                    <TableCell style={{padding:5}}></TableCell>
+                    <TableCell ></TableCell>
+                    <TableCell ></TableCell>
+                    <TableCell ></TableCell>
+                    <TableCell ></TableCell>
 
-                    <TableCell style={{padding:5}} >
+                    <TableCell  >
                 <FormControlLabel label="Блокировать" onChange={(event)=>block(e,event)} checked={blocks[e].isBlock} control={<Checkbox  color="default" />}style={{margin:10,fontSize:10}} />
                 </TableCell>
                     </React.Fragment>)
@@ -356,15 +429,15 @@ getCourse()
                 }
                   
           </TableRow>
-          <TableRow  style={{padding:5}}>
+          <TableRow  >
          
+            <TableCell></TableCell> 
+            <TableCell >ID</TableCell>
+            <TableCell >Артикул</TableCell>
 
-            <TableCell style={{padding:5}}>ID</TableCell>
-            <TableCell style={{padding:5}}>Артикул</TableCell>
-
-           <TableCell style={{padding:5}}>Наименование</TableCell>
-           <TableCell style={{padding:5}}>Бренд</TableCell>
-           <TableCell style={{padding:5}}>Колво</TableCell>
+           <TableCell >Наименование</TableCell>
+           <TableCell >Бренд</TableCell>
+           <TableCell >Колво</TableCell>
             {
               _.times(supplyCount,function(e){
 
@@ -374,15 +447,15 @@ getCourse()
 
 
                 <TableCell  style={{padding:5,borderLeft:"1px solid #D2CECD"}}>Цена</TableCell>
-                <TableCell  style={{padding:5}}>
+                <TableCell  >
                 <FormControlLabel onChange={(event)=>checkAll(e,event)} control={<Checkbox   color="default" />}style={{margin:10}} />
                 </TableCell >
-                <TableCell style={{padding:5}} >Кол-во1</TableCell>
-                <TableCell style={{padding:5}} >Кол-во2</TableCell>
+                <TableCell  >Кол-во1</TableCell>
+                <TableCell  >Кол-во2</TableCell>
 
-                <TableCell  style={{padding:5}}>Срок1</TableCell>
-                <TableCell  style={{padding:5}}>Срок2</TableCell>
-                <TableCell  style={{padding:5}}>Замена</TableCell>
+                <TableCell  >Срок1</TableCell>
+                <TableCell  >Срок2</TableCell>
+                <TableCell  >Замена</TableCell>
 
                 </React.Fragment>
                 );
@@ -403,11 +476,16 @@ getCourse()
                 key={"deal_"+dealIndex}
                
               >
-                <TableCell style={{padding:5}}>{row.id}</TableCell>
-                <TableCell style={{padding:5}}>{row.products.length > 0 ? row.products[0].article:""}</TableCell>
-                <TableCell style={{padding:5}}>{row.products.length>0?row.products[0].name:""}</TableCell>
-                <TableCell style={{padding:5}}>{row.products[0]?.brands.length>0?row.products[0]?.brands[0].title:""}</TableCell>
-                <TableCell style={{padding:5}}>{row.quantity}шт.</TableCell>
+                <TableCell> 
+                  <Button style={{height:30,textDecoration:"none"}} onClick={()=>{setProductsOpen(true);fetchFeedback(row.products[0].id)}} variant="outlined" size="small">
+                  посмотреть
+                </Button>
+                </TableCell>
+                <TableCell >{row.id}</TableCell>
+                <TableCell >{row.products.length > 0 ? row.products[0].article:""}</TableCell>
+                <TableCell >{row.products.length>0?row.products[0].name:""}</TableCell>
+                <TableCell >{row.products[0]?.brands.length>0?row.products[0]?.brands[0].title:""}</TableCell>
+                <TableCell >{row.quantity}шт.</TableCell>
                 {
                   row.supplier_rows.map((supply,index)=>(
                     <React.Fragment key={"supply_"+index}>
@@ -415,26 +493,26 @@ getCourse()
                       <TableCell style={{padding:5,borderLeft:"1px solid #D2CECD"}} >
                         {supply.total_price.toFixed(2)}$
                       </TableCell>
-                      <TableCell style={{padding:5}}>
+                      <TableCell >
                       {        <FormControlLabel control={<Checkbox  color="default" onChange={(event)=>check(dealIndex,index,event)}  checked={deals[dealIndex].supplier_rows[index].calculation} />}style={{margin:10,fontSize:10}} />
   }
   
                       </TableCell>
-                      <TableCell style={{padding:5}}>
+                      <TableCell >
                       {supply.quentity_calculation}
   
                       </TableCell>
-                      <TableCell style={{padding:5}}>
+                      <TableCell >
                       {supply.quantitysd}
   
                       </TableCell>
-                      <TableCell style={{padding:5}}>
+                      <TableCell >
                         {supply.delivery_date} дней
                       </TableCell>
-                      <TableCell style={{padding:5}}>
+                      <TableCell >
                         {supply.delivery_date_sd==null?"":supply.delivery_date_sd+ " дней"} 
                       </TableCell>
-                      <TableCell style={{padding:5}}>
+                      <TableCell >
                         {supply.replacement!=null&&
                         <React.Fragment>
                                 <Button>Заменить</Button>

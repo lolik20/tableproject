@@ -31,7 +31,7 @@ import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import url from './url.json'
 import { TablePagination } from '@mui/material';
-
+import './DealTableData.css'
 const axios = require('axios').default;
 
 export function DealTableData() {
